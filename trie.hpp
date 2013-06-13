@@ -1,9 +1,19 @@
+#ifndef BOOST_TRIE_HPP
+#define BOOST_TRIE_HPP
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#pragma once
+#endif
+
+
 #include <map>
 #include <iterator>
 #include <utility>
 #include <cstdio>
-using std::pair;
-using std::make_pair;
+
+namespace boost { namespace tries {
+
+namespace detail {
 
 template <typename Key, typename Value>
 class trie_node {
@@ -12,16 +22,18 @@ class trie_node {
 	typedef key_type *key_ptr;
 	typedef trie_node<key_type, value_type> node_type;
 	typedef trie_node<key_type, value_type> * node_ptr;
-	typedef typename std::map<key_type, node_ptr> children_type;
-	children_type child;
+	typedef std::map<key_type, node_ptr> children_type;
 	typedef typename children_type::iterator child_iter;
-	//typedef std::map<key_type, int>::iterator child_iter;
-	//typedef children_type::iterator child_iter;
+
+	children_type child;
+
 public:
 	value_type *value; // how to initiate
+
 	trie_node() : value(NULL) {}
+
 	template<typename Iter>
-	pair<node_ptr, bool> insert_impl(Iter cur_iter, Iter iter_end, 
+	std::pair<node_ptr, bool> insert_impl(Iter cur_iter, Iter iter_end, 
 			const value_type &_value, const key_type &cur_key)
 	{
 		if (cur_iter == iter_end)
@@ -30,7 +42,7 @@ public:
 			{
 				value = new value_type(_value);
 			}
-			return make_pair(this, true);
+			return std::make_pair(this, true);
 		}
 		//key_type cur_key = *cur_iter;
 		//printf("%c\n", cur_key);
@@ -44,7 +56,7 @@ public:
 				_value, *cur_iter);
 	}
 	template<typename Iter>
-	pair<node_ptr, bool> insert(Iter cur_iter, Iter iter_end, const value_type &_value)
+	std::pair<node_ptr, bool> insert(Iter cur_iter, Iter iter_end, const value_type &_value)
 	{
 		// use cur_iter as trait
 		return insert_impl(cur_iter, iter_end, _value, *cur_iter);
@@ -164,26 +176,40 @@ public:
 		return false;
 	}
 
-	bool destroy()
+	void destroy()
 	{
 		for (child_iter ci(child.begin()); ci != child.end(); ++ci)
 		{
-			ci->second.destroy();
+			ci->second->destroy();
 			delete ci->second;
 		}
 		child.clear();
+		if (value)
+		{
+			delete value;
+		}
+	}
+
+	~trie_node()
+	{
+		//puts("delete a node");
+		destroy();
 	}
 };
+
+} // namespace detail
 
 template <typename Key, typename Value>
 class trie {
 	typedef Key key_type;
 	typedef Value value_type;
 	typedef trie<key_type, value_type> trie_type;
-	typedef trie_node<key_type, value_type> node_type;
+	typedef detail::trie_node<key_type, value_type> node_type;
 	typedef key_type * key_ptr;
-	typedef trie_node<key_type, value_type> * node_ptr;
-	node_type *root;
+	typedef node_type * node_ptr;
+
+	node_ptr root;
+
 public:
 
 	// iterators still unavailable here
@@ -193,16 +219,16 @@ public:
 	}
 
 	template<typename Iter>
-	pair<node_ptr, bool> insert(Iter first, Iter last, const value_type &value)
+	std::pair<node_ptr, bool> insert(Iter first, Iter last, const value_type &value)
 	{
 		return root->insert(first, last, value);
 	}
 	template<typename Container>
-	pair<node_ptr, bool> insert(const Container &container, const value_type &value)
+	std::pair<node_ptr, bool> insert(const Container &container, const value_type &value)
 	{
 		return root->insert(container.begin(), container.end(), value);
 	}
-	pair<node_ptr, bool> insert(key_ptr key_string, int len, const value_type &value)
+	std::pair<node_ptr, bool> insert(key_ptr key_string, int len, const value_type &value)
 	{
 		return root->insert(key_string, key_string + len, value);
 	}
@@ -282,6 +308,13 @@ public:
 		return root->destroy();
 	}
 
+	~trie()
+	{
+		root->destroy();
+		delete root;
+		//puts("delete the whole trie");
+	}
+
 	/*
 	 * the count() and size() function are not defined here, 
 	 * the function of size() and count() may give different return values,
@@ -290,3 +323,5 @@ public:
 	 */
 };
 
+}} // boostLLtries
+#endif // BOOST_TRIE_HPP
