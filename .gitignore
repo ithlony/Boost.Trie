@@ -15,3 +15,8 @@
 *.gch
 *.obj
 *.exe
+makefile
+*.*
+!.gitignore
+!trie.hpp
+!trie_old.hpp
