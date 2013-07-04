@@ -1,0 +1,46 @@
+
+[library My Library
+    [quickbook 1.4]
+    [version 0.01e-10]
+    [authors [Doe, John]]
+    [copyright 2007 John Doe]
+    [purpose Doing nothing.]
+    [license
+        Distributed under the Boost Software License, Version 1.0.
+        (See accompanying file LICENSE_1_0.txt or copy at
+        [@http://www.boost.org/LICENSE_1_0.txt])
+    ]
+]
+
+Welcome to the My Library!  One day, it will perhaps be called
+Boost.My Library. Until then, feel free to use it to do nothing.
+
+[warning My Library is not an official Boost library.]
+
+[section:introduction Introduction]
+
+User, this is My Library.  My Library, this is the user.  Be nice to each other.
+
+[section:start Getting Started]
+
+The My Library is located in the my_library directory of the boost sandbox.
+
+
+You might also want to look at the [link my_library.reference reference].
+
+
+[endsect]
+
+[endsect]
+
+[xinclude my_library_doxygen.xml]
+
+[section:license License]
+
+Copyright 2007 John Doe.
+Distributed under the Boost Software License, Version 1.0. (See
+accompanying file LICENSE_1_0.txt or copy at
+[@http://www.boost.org/LICENSE_1_0.txt])
+
+
+[endsect]

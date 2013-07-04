@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title> Substitution templates
+      and special templates</title>
+<link rel="stylesheet" href="../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.67.2">
+<link rel="start" href="../../index.html" title="Chapter 1. FileTemplate 0.92">
+<link rel="up" href="../templates.html" title=" FileTemplate templates">
+<link rel="prev" href="options.html" title=" Options">
+<link rel="next" href="merges.html" title=" Template merges">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%">
+<td valign="top"><img alt="Boost C++ Libraries" width="277" height="86" src="../../../../boost.png"></td>
+<td align="center"><a href="../../../../index.htm">Home</a></td>
+<td align="center"><a href="../../libraries.html">Libraries</a></td>
+<td align="center"><a href="../../../../people/people.htm">People</a></td>
+<td align="center"><a href="../../../../more/faq.htm">FAQ</a></td>
+<td align="center"><a href="../../../../more/index.htm">More</a></td>
+</table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="options.html"><img src="../../../../doc/html/images/prev.png" alt="Prev"></a><a accesskey="u" href="../templates.html"><img src="../../../../doc/html/images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../../../doc/html/images/home.png" alt="Home"></a><a accesskey="n" href="merges.html"><img src="../../../../doc/html/images/next.png" alt="Next"></a>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="filetemplate.templates.substitutions"></a><a href="substitutions.html" title=" Substitution templates
+      and special templates"> Substitution templates
+      and special templates</a></h3></div></div></div>
+<a name="filetemplate.templates.substitutions.substitution_templates"></a><h4>
+<a name="id905781"></a>
+        <a href="substitutions.html#filetemplate.templates.substitutions.substitution_templates">Substitution
+        templates</a>
+      </h4>
+<p>
+        Substitution templates are the simplest form of template customization. For
+        specified file extensions, the template processor will replace each occurence
+        of a substitution template with the substituted text. For some examples,
+        see the <a href="../../">substitutions</a>
+        of the sandbox template.
+      </p>
+<p>
+        Substitution templates are divided into two categories - <span class="emphasis"><em>specific</em></span>
+        and <span class="emphasis"><em>general</em></span>. Specific substitution templates are only
+        applied to specific file extensions. General substitution templates are applied
+        to any file extension that has <span class="bold"><strong>at least one</strong></span>
+        specific substitution defined. Files with no specific substitution templates
+        will be copied verbatim.
+      </p>
+<div class="tip"><table border="0" summary="Tip">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="../../../../doc/html/images/tip.png"></td>
+<th align="left">Tip</th>
+</tr>
+<tr><td colspan="2" align="left" valign="top">
+<p>
+          </p>
+<p>
+            Substitutions are applied in the order they are specified in the template
+            scripts, so substituted text for one substitution template can include
+            substitution templates specified after it. For example, in the sandbox
+            template $template_cpp_copyright$ expands into text which includes $template_authors$.
+          </p>
+<p>
+        </p>
+</td></tr>
+</table></div>
+<a name="filetemplate.templates.substitutions.special_templates"></a><h4>
+<a name="id905860"></a>
+        <a href="substitutions.html#filetemplate.templates.substitutions.special_templates">Special
+        templates</a>
+      </h4>
+<p>
+        There are also <span class="emphasis"><em>special</em></span> templates, which are also applied
+        whenever substitution templates are applied (i.e., for file extensions with
+        at least one specific extension defined). The FileTemplate processor uses
+        one special template:
+      </p>
+<div class="table">
+<a name="id905886"></a><p class="title"><b>Table 1.7. Special templates used by the FileTemplate template
+      processor</b></p>
+<table class="table" summary="Special templates used by the FileTemplate template
+      processor">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+            <p>
+              special template
+            </p>
+            </th>
+<th>
+            <p>
+              desctiption
+            </p>
+            </th>
+</tr></thead>
+<tbody><tr>
+<td>
+            <p>
+              $template_start$
+            </p>
+            </td>
+<td>
+            <p>
+              Everything up to the line of the file containing the first occurrence
+              of this special template will be ignored.
+            </p>
+            </td>
+</tr></tbody>
+</table>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><small>Copyright © 2007 Stjepan Rajko</small></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="options.html"><img src="../../../../doc/html/images/prev.png" alt="Prev"></a><a accesskey="u" href="../templates.html"><img src="../../../../doc/html/images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../../../doc/html/images/home.png" alt="Home"></a><a accesskey="n" href="merges.html"><img src="../../../../doc/html/images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

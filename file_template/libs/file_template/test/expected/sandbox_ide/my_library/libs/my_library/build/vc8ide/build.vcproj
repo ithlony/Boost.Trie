@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="build"
+	ProjectGUID="{7b966b72-c2c5-4895-a9ff-c99ba753f3ab}"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="debug|Win32"
+			OutputDirectory="..\..\..\..\bin.v2\libs\$(SolutionName)\$(ProjectName)\msvc-8.0\$(ConfigurationName)\threading-multi"
+			IntermediateDirectory="$(OutDir)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="bjam --v2 ../../$(ProjectName) $(ConfigurationName)"
+				ReBuildCommandLine="bjam --v2 -a ../../$(ProjectName) $(ConfigurationName)"
+				CleanCommandLine="bjam --v2 --clean ../../$(ProjectName) $(ConfigurationName)"
+
+				Output=""
+				PreprocessorDefinitions=""
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="release|Win32"
+			OutputDirectory="..\..\..\..\bin.v2\libs\$(SolutionName)\$(ProjectName)\msvc-8.0\$(ConfigurationName)\threading-multi"
+			IntermediateDirectory="$(OutDir)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="bjam --v2 ../../$(ProjectName) $(ConfigurationName)"
+				ReBuildCommandLine="bjam --v2 -a ../../$(ProjectName) $(ConfigurationName)"
+				CleanCommandLine="bjam --v2 --clean ../../$(ProjectName) $(ConfigurationName)"
+
+				Output=""
+				PreprocessorDefinitions=""
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<File
+			RelativePath="..\..\..\../boost/my_library.hpp"
+			>
+		</File>
+		<Filter
+			Name="my_library"
+			>
+			<File
+				RelativePath="..\..\..\../boost/my_library/my_library.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="solution build"
+			>
+			<File
+				RelativePath="..\..\..\..\boost-build.jam"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\project-root.jam"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\Jamfile.v2"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath="..\..\build\Jamfile.v2"
+			>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

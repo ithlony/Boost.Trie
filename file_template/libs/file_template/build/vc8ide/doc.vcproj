@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="doc"
+	ProjectGUID="{F404C298-0B3D-4CED-A682-87C4220F1E8C}"
+	RootNamespace="doc"
+	Keyword="MakeFileProj"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="release|Win32"
+			OutputDirectory="..\..\..\..\bin.v2\libs\$(SolutionName)\$(ProjectName)\msvc-8.0\$(ConfigurationName)\threading-multi"
+			IntermediateDirectory="$(OutDir)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd ../../doc&#x0D;&#x0A;bjam --v2 $(ConfigurationName)"
+				ReBuildCommandLine="cd ../../doc&#x0D;&#x0A;bjam --v2 -a $(ConfigurationName)"
+				CleanCommandLine="bjam --v2 --clean ../../$(ProjectName) $(ConfigurationName)"
+				Output=""
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			>
+			<File
+				RelativePath="..\..\doc\file_template.qbk"
+				>
+			</File>
+			<File
+				RelativePath="..\..\doc\sandbox.qbk"
+				>
+			</File>
+			<File
+				RelativePath="..\..\doc\templates.qbk"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath="..\..\doc\Jamfile.v2"
+			>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

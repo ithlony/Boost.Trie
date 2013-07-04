@@ -1,0 +1,2 @@
+This will get copied because the 'doc' extension is not processed: $template_text$
+$template_substitution$

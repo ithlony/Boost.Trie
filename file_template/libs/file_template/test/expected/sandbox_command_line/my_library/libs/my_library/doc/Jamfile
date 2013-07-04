@@ -1,0 +1,45 @@
+# Copyright 2007 John Doe.
+# Distributed under the Boost Software License, Version 1.0. (See
+# accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+
+project boost/my_library/doc ;
+
+import boostbook : boostbook ;
+using quickbook ;
+
+local loc = [ path.native [ path.pwd ] ] ;
+local root = [ path.native [ path.join [ path.pwd ] ../../.. ] ] ;
+
+xml my_library_xml : my_library.qbk ;
+doxygen my_library_doxygen
+   :
+      [ glob
+             ../../../boost/my_library/*.hpp ]
+   :
+        <doxygen:param>EXAMPLE_PATH=../example
+        <doxygen:param>STRIP_FROM_PATH=$(root)
+        <doxygen:param>STRIP_FROM_INC_PATH=$(root)
+        <doxygen:param>EXTRACT_ALL=NO
+        <doxygen:param>HIDE_UNDOC_MEMBERS=NO
+        <doxygen:param>EXTRACT_PRIVATE=NO
+        <doxygen:param>DETAILS_AT_TOP=YES
+        <doxygen:param>ENABLE_PREPROCESSING=YES
+        <doxygen:param>MACRO_EXPANSION=YES
+        <doxygen:param>SEARCH_INCLUDES=YES
+        <doxygen:param>INCLUDE_PATH=../../..
+        <doxygen:param>PREDEFINED=DOXYGEN_DOCS_ONLY
+   ;
+
+boostbook standalone
+   :
+      my_library_xml
+      my_library_doxygen
+    :
+        <xsl:param>chunk.first.sections=1
+        <xsl:param>chunk.section.depth=3
+        <xsl:param>toc.section.depth=3
+        <xsl:param>toc.max.depth=3
+        <xsl:param>generate.section.toc.level=3
+    ;

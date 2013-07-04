@@ -1,0 +1,294 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title> Substitution templates</title>
+<link rel="stylesheet" href="../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.67.2">
+<link rel="start" href="../../index.html" title="Chapter 1. FileTemplate 0.92">
+<link rel="up" href="../sandbox.html" title=" Boost sandbox template">
+<link rel="prev" href="options.html" title=" Options">
+<link rel="next" href="documentation.html" title=" Documentation formats">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%">
+<td valign="top"><img alt="Boost C++ Libraries" width="277" height="86" src="../../../../boost.png"></td>
+<td align="center"><a href="../../../../index.htm">Home</a></td>
+<td align="center"><a href="../../libraries.html">Libraries</a></td>
+<td align="center"><a href="../../../../people/people.htm">People</a></td>
+<td align="center"><a href="../../../../more/faq.htm">FAQ</a></td>
+<td align="center"><a href="../../../../more/index.htm">More</a></td>
+</table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="options.html"><img src="../../../../doc/html/images/prev.png" alt="Prev"></a><a accesskey="u" href="../sandbox.html"><img src="../../../../doc/html/images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../../../doc/html/images/home.png" alt="Home"></a><a accesskey="n" href="documentation.html"><img src="../../../../doc/html/images/next.png" alt="Next"></a>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="filetemplate.sandbox.substitutions"></a><a href="substitutions.html" title=" Substitution templates"> Substitution templates</a></h3></div></div></div>
+<p>
+        The following substitutions are defined for file and directory names:
+      </p>
+<div class="table">
+<a name="id904163"></a><p class="title"><b>Table 1.2. File and directory name substitutions used by the
+      sandbox template</b></p>
+<table class="table" summary="File and directory name substitutions used by the
+      sandbox template">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+            <p>
+              substitution template
+            </p>
+            </th>
+<th>
+            <p>
+              substituted text
+            </p>
+            </th>
+</tr></thead>
+<tbody><tr>
+<td>
+            <p>
+              $template_library$
+            </p>
+            </td>
+<td>
+            <p>
+              The library name specified by the user
+            </p>
+            </td>
+</tr></tbody>
+</table>
+</div>
+<div class="table">
+<a name="id904217"></a><p class="title"><b>Table 1.3. File content substitutions used by the
+      sandbox template</b></p>
+<table class="table" summary="File content substitutions used by the
+      sandbox template">
+<colgroup>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+            <p>
+              substitution template
+            </p>
+            </th>
+<th>
+            <p>
+              substituted text
+            </p>
+            </th>
+<th>
+            <p>
+              extensions
+            </p>
+            </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+            <p>
+              $template_library$
+            </p>
+            </td>
+<td>
+            <p>
+              The library_name specified by the user
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_Library$
+            </p>
+            </td>
+<td>
+            <p>
+              Capitalized Library Name
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_LibraryConcat$
+            </p>
+            </td>
+<td>
+            <p>
+              Concatenated, capitalized LibraryName
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_LIBRARY$
+            </p>
+            </td>
+<td>
+            <p>
+              Uppercase LIBRARY_NAME
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_Boost_Library$
+            </p>
+            </td>
+<td>
+            <p>
+              The full Boost.Library Name name of the library
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_copyright$
+            </p>
+            </td>
+<td>
+            <p>
+              Python-style commented copyright block
+            </p>
+            </td>
+<td>
+            <p>
+              Jamfile,.jam,.v2
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_copyright$
+            </p>
+            </td>
+<td>
+            <p>
+              C++-style commented copyright block
+            </p>
+            </td>
+<td>
+            <p>
+              .hpp, .cpp
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_qbk_copyright$
+            </p>
+            </td>
+<td>
+            <p>
+              Copyright block with quickbook-style link
+            </p>
+            </td>
+<td>
+            <p>
+              .qbk
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_authors_reversed$
+            </p>
+            </td>
+<td>
+            <p>
+              Bracketed list of authors, last name first
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_authors$
+            </p>
+            </td>
+<td>
+            <p>
+              list of authors, as specified by the user
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              $template_year$
+            </p>
+            </td>
+<td>
+            <p>
+              Current year
+            </p>
+            </td>
+<td>
+            <p>
+              general
+            </p>
+            </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><small>Copyright © 2007 Stjepan Rajko</small></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="options.html"><img src="../../../../doc/html/images/prev.png" alt="Prev"></a><a accesskey="u" href="../sandbox.html"><img src="../../../../doc/html/images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../../../doc/html/images/home.png" alt="Home"></a><a accesskey="n" href="documentation.html"><img src="../../../../doc/html/images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

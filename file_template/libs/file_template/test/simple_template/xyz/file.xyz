@@ -1,0 +1,2 @@
+This will get substituted in xyz: $template_text$
+This will get substituted: $template_substitution$

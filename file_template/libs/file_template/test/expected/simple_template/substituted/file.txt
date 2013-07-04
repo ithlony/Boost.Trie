@@ -1,0 +1,2 @@
+This will get substituted: substituted in txt file
+This will get substituted: substituted

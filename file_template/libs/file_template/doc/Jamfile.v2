@@ -1,0 +1,25 @@
+# Copyright 2007 Stjepan Rajko.
+# Distributed under the Boost Software License, Version 1.0. (See
+# accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+
+project boost/file_template/doc ;
+
+using quickbook ;
+
+local loc = [ path.native [ path.pwd ] ] ;
+local root = [ path.native [ path.join [ path.pwd ] ../../.. ] ] ;
+
+xml file_template_xml : file_template.qbk ;
+boostbook standalone
+   :
+      file_template_xml
+   :
+        <xsl:param>chunk.first.sections=1
+        <xsl:param>chunk.section.depth=3
+        <xsl:param>toc.section.depth=4
+        <xsl:param>toc.max.depth=4
+        <xsl:param>generate.section.toc.level=2
+        <xsl:param>annotation.support=1
+    ;

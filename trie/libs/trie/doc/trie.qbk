@@ -1,0 +1,46 @@
+
+[library Trie
+    [quickbook 1.4]
+    [version 0.01e-10]
+    [authors [Hardy, ]]
+    [copyright 2013 Hardy]
+    [purpose Doing nothing.]
+    [license
+        Distributed under the Boost Software License, Version 1.0.
+        (See accompanying file LICENSE_1_0.txt or copy at
+        [@http://www.boost.org/LICENSE_1_0.txt])
+    ]
+]
+
+Welcome to the Trie!  One day, it will perhaps be called
+Boost.Trie. Until then, feel free to use it to do nothing.
+
+[warning Trie is not an official Boost library.]
+
+[section:introduction Introduction]
+
+User, this is Trie.  Trie, this is the user.  Be nice to each other.
+
+[section:start Getting Started]
+
+The Trie is located in the trie directory of the boost sandbox.
+
+
+You might also want to look at the [link trie.reference reference].
+
+
+[endsect]
+
+[endsect]
+
+[xinclude trie_doxygen.xml]
+
+[section:license License]
+
+Copyright 2013 Hardy.
+Distributed under the Boost Software License, Version 1.0. (See
+accompanying file LICENSE_1_0.txt or copy at
+[@http://www.boost.org/LICENSE_1_0.txt])
+
+
+[endsect]

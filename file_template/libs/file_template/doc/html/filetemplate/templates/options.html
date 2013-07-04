@@ -1,0 +1,347 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title> Options</title>
+<link rel="stylesheet" href="../../boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.67.2">
+<link rel="start" href="../../index.html" title="Chapter 1. FileTemplate 0.92">
+<link rel="up" href="../templates.html" title=" FileTemplate templates">
+<link rel="prev" href="phases/processing.html" title=" Producing
+        the resulting file tree">
+<link rel="next" href="substitutions.html" title=" Substitution templates
+      and special templates">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table cellpadding="2" width="100%">
+<td valign="top"><img alt="Boost C++ Libraries" width="277" height="86" src="../../../../boost.png"></td>
+<td align="center"><a href="../../../../index.htm">Home</a></td>
+<td align="center"><a href="../../libraries.html">Libraries</a></td>
+<td align="center"><a href="../../../../people/people.htm">People</a></td>
+<td align="center"><a href="../../../../more/faq.htm">FAQ</a></td>
+<td align="center"><a href="../../../../more/index.htm">More</a></td>
+</table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="phases/processing.html"><img src="../../../../doc/html/images/prev.png" alt="Prev"></a><a accesskey="u" href="../templates.html"><img src="../../../../doc/html/images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../../../doc/html/images/home.png" alt="Home"></a><a accesskey="n" href="substitutions.html"><img src="../../../../doc/html/images/next.png" alt="Next"></a>
+</div>
+<div class="section" lang="en">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="filetemplate.templates.options"></a><a href="options.html" title=" Options"> Options</a></h3></div></div></div>
+<p>
+        Options are used to fine-tune the behavior of the FileTemplate template processor
+        as well as the behavior of the template.
+      </p>
+<a name="filetemplate.templates.options.global_options"></a><h4>
+<a name="id905417"></a>
+        <a href="options.html#filetemplate.templates.options.global_options">Global options</a>
+      </h4>
+<p>
+        <span class="emphasis"><em>Global options</em></span> govern the behavior of the template processor.
+      </p>
+<div class="table">
+<a name="id905439"></a><p class="title"><b>Table 1.5. Global options</b></p>
+<table class="table" summary="Global options">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+            <p>
+              option
+            </p>
+            </th>
+<th>
+            <p>
+              desctiption
+            </p>
+            </th>
+<th>
+            <p>
+              valid values
+            </p>
+            </th>
+<th>
+            <p>
+              default value
+            </p>
+            </th>
+</tr></thead>
+<tbody><tr>
+<td>
+            <p>
+              destination
+            </p>
+            </td>
+<td>
+            <p>
+              Destination directory where the results will be constructed.
+            </p>
+            </td>
+<td>
+            <p>
+              valid directory path (will be created if it does not exist)
+            </p>
+            </td>
+<td>
+            <p>
+              current directory
+            </p>
+            </td>
+</tr></tbody>
+</table>
+</div>
+<a name="filetemplate.templates.options.template_options"></a><h4>
+<a name="id905525"></a>
+        <a href="options.html#filetemplate.templates.options.template_options">Template
+        options</a>
+      </h4>
+<p>
+        <span class="emphasis"><em>Template options</em></span> can be used to specify how a particular
+        template is processed. Templates may use additional, template-specific options,
+        as is the case with <a href="../sandbox/reference/options.html" title=" Options">sandbox
+        options</a>.
+      </p>
+<div class="table">
+<a name="id905558"></a><p class="title"><b>Table 1.6. Template options</b></p>
+<table class="table" summary="Template options">
+<colgroup>
+<col>
+<col>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+            <p>
+              option
+            </p>
+            </th>
+<th>
+            <p>
+              desctiption
+            </p>
+            </th>
+<th>
+            <p>
+              valid values
+            </p>
+            </th>
+<th>
+            <p>
+              default value
+            </p>
+            </th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+            <p>
+              template
+            </p>
+            </td>
+<td>
+            <p>
+              Template directory
+            </p>
+            </td>
+<td>
+            <p>
+              valid directory
+            </p>
+            </td>
+<td>
+            <p>
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              into
+            </p>
+            </td>
+<td>
+            <p>
+              Determines where the output of the template will be placed inside the
+              resulting tree
+            </p>
+            </td>
+<td>
+            <p>
+              valid directoy in resulting tree
+            </p>
+            </td>
+<td>
+            <p>
+              root of the resulting tree
+            </p>
+            </td>
+</tr>
+<tr>
+<td>
+            <p>
+              ignore
+            </p>
+            </td>
+<td>
+            <p>
+              Ignores a directory of the source template tree
+            </p>
+            </td>
+<td>
+            <p>
+              directory in source template tree
+            </p>
+            </td>
+<td>
+            <p>
+            </p>
+            </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>
+        Options can be specified using the command line. See the <a href="phases/invocation.html" title=" Invocation">invocation
+        phase</a> reference for more information. If an option is not specified
+        in the command line, and it has no default value, the user will be prompted
+        for the value.
+      </p>
+<p>
+        This is the output of a sample session:
+      </p>
+<pre class="programlisting">python.exe make_template.py <span class="bold"><strong>sandbox</strong></span>
+/-------------------------------------------
+| Processing template sandbox with options:
++---
+|| {'ignore': set([]), 'template': 'sandbox'}
+|/-------------------------------------------
+|| Examining the template project tree...
+|+---
+|||
+||/-------------------------------------------
+||| Welcome to the Boost Sandbox template.
+||+---
+||/-------------------------------------------
+||| <span class="bold"><strong>Enter value for option library:</strong></span>
+||+---
+||| <span class="bold"><strong>(all lowercase, use underscores to separate words, e.g. "my_library"): my_library</strong></span>
+||/-------------------------------------------
+||| <span class="bold"><strong>Enter value for option authors:
+||+---
+||| (comma separated, no spaces outside names, e.g., "My Name,Notmy R. Name": Stjepan Rajko</strong></span>
+||| $template_library$
+||| $template_library$/boost
+||| $template_library$/boost/$template_library$
+||| $template_library$/libs
+||| $template_library$/libs/$template_library$
+||| $template_library$/libs/$template_library$/build
+||| $template_library$/libs/$template_library$/test
+||| $template_library$/libs/$template_library$/doc
+||| $template_library$/libs/$template_library$/doc\html
+||| $template_library$/libs/$template_library$/doc/html/images
+||| $template_library$/libs/$template_library$/src
+||| $template_library$/libs/$template_library$/example
+/-------------------------------------------
+| Preparing destination tree...
++---
+|/-------------------------------------------
+|| Directories:
+|+---
+|| my_library
+|| my_library/boost
+|| my_library/libs
+|| my_library/boost/my_library
+|| my_library/libs/my_library
+|| my_library/libs/my_library/build
+|| my_library/libs/my_library/test
+|| my_library/libs/my_library/doc
+|| my_library/libs/my_library/src
+|| my_library/libs/my_library/example
+|| my_library/libs/my_library/doc/html
+|| my_library/libs/my_library/doc/html/images
+|/-------------------------------------------
+|| Files:
+|+---
+|| my_library/LICENSE_1_0.txt
+|| my_library/boost-build.jam
+|| my_library/Jamfile.v2
+|| my_library/project-root.jam
+|| my_library/boost/my_library.hpp
+|| my_library/boost/my_library/my_library.hpp
+|| my_library/libs/my_library/test/test.cpp
+|| my_library/libs/my_library/test/Jamfile.v2
+|| my_library/libs/my_library/doc/html/reference.css
+|| my_library/libs/my_library/doc/html/boostbook.css
+|| my_library/libs/my_library/doc/html/images/prev.png
+|| my_library/libs/my_library/doc/html/images/tip.png
+|| my_library/libs/my_library/doc/html/images/important.png
+|| my_library/libs/my_library/doc/html/images/next.png
+|| my_library/libs/my_library/doc/html/images/toc-minus.png
+|| my_library/libs/my_library/doc/html/images/draft.png
+|| my_library/libs/my_library/doc/html/images/caution.png
+|| my_library/libs/my_library/doc/html/images/Thumbs.db
+|| my_library/libs/my_library/doc/html/images/up.png
+|| my_library/libs/my_library/doc/html/images/note.png
+|| my_library/libs/my_library/doc/html/images/warning.png
+|| my_library/libs/my_library/doc/html/images/toc-plus.png
+|| my_library/libs/my_library/doc/html/images/blank.png
+|| my_library/libs/my_library/doc/html/images/home.png
+|| my_library/libs/my_library/doc/html/images/toc-blank.png
+|| my_library/libs/my_library/example/example.cpp
+|| my_library/libs/my_library/example/Jamfile.v2
+|| my_library/libs/my_library/doc/my_library.qbk
+|| my_library/libs/my_library/doc/Jamfile.v2
+/-------------------------------------------
+| Creating file tree from template...
++---
+|/-------------------------------------------
+|| Python files...
+|+---
+||| ./my_library/libs/my_library/doc/my_library.qbk
+||| ./my_library/libs/my_library/doc/Jamfile.v2
+|/-------------------------------------------
+|| Files...
+|+---
+||| ./my_library/LICENSE_1_0.txt
+||| ./my_library/boost-build.jam
+||| ./my_library/Jamfile.v2
+||| ./my_library/project-root.jam
+||| ./my_library/boost/my_library.hpp
+||| ./my_library/boost/my_library/my_library.hpp
+||| ./my_library/libs/my_library/test/test.cpp
+||| ./my_library/libs/my_library/test/Jamfile.v2
+||| ./my_library/libs/my_library/doc/html/reference.css
+||| ./my_library/libs/my_library/doc/html/boostbook.css
+||| ./my_library/libs/my_library/doc/html/images/prev.png
+||| ./my_library/libs/my_library/doc/html/images/tip.png
+||| ./my_library/libs/my_library/doc/html/images/important.png
+||| ./my_library/libs/my_library/doc/html/images/next.png
+||| ./my_library/libs/my_library/doc/html/images/toc-minus.png
+||| ./my_library/libs/my_library/doc/html/images/draft.png
+||| ./my_library/libs/my_library/doc/html/images/caution.png
+||| ./my_library/libs/my_library/doc/html/images/Thumbs.db
+||| ./my_library/libs/my_library/doc/html/images/up.png
+||| ./my_library/libs/my_library/doc/html/images/note.png
+||| ./my_library/libs/my_library/doc/html/images/warning.png
+||| ./my_library/libs/my_library/doc/html/images/toc-plus.png
+||| ./my_library/libs/my_library/doc/html/images/blank.png
+||| ./my_library/libs/my_library/doc/html/images/home.png
+||| ./my_library/libs/my_library/doc/html/images/toc-blank.png
+||| ./my_library/libs/my_library/example/example.cpp
+||| ./my_library/libs/my_library/example/Jamfile.v2
+</pre>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><small>Copyright © 2007 Stjepan Rajko</small></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="phases/processing.html"><img src="../../../../doc/html/images/prev.png" alt="Prev"></a><a accesskey="u" href="../templates.html"><img src="../../../../doc/html/images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../../../doc/html/images/home.png" alt="Home"></a><a accesskey="n" href="substitutions.html"><img src="../../../../doc/html/images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

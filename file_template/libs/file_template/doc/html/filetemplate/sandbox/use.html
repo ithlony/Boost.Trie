@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title> Use Cases</title><link rel="stylesheet" href="../../../../doc/style/html/main.css" type="text/css" /><meta name="generator" content="DocBook XSL Stylesheets V1.67.2" /><link rel="start" href="../../index.html" title="Chapter 1. FileTemplate 0.94" /><link rel="up" href="../sandbox.html" title=" Boost sandbox template" /><link rel="prev" href="tools.html" title=" Configuring the tools and&#10;      checking out the Boost sandbox" /><link rel="next" href="outside_docs.html" title=" Links to helpful&#10;      outside documentation" /><script type="text/javascript" src="../../../../doc/javascript/main.js"></script>
+      <script type="text/javascript" > <!--
+         boostscript.init( new Array(
+            boostscript.nested_links,
+            boostscript.style_switcher,
+            boostscript.common
+         ),
+         '../../../../doc/javascript'
+         );
+      //--></script>
+
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'include_alternate_stylesheets',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+<link rel="alternate stylesheet" type="text/css" title="Quickbook source" href="../../../../doc/style/html/conversion/boostbook_to_quickbook.css" />
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'load_user_stylesheet' );
+      //--></script>
+</head>
+  <body>
+    <div id="heading">
+      <div id="heading-placard"></div>
+      <div class="heading-navigation-box">
+        <div class="nested-links-select-box" id="chapters_select_box">
+      <script type="text/javascript" > <!--
+         boostscript.call( boostscript.nested_links, 'select_box',
+            'chapters_select_box',
+            '../../../../doc/chapters.xml',
+            '../../../../libs');
+      //--></script>
+</div>
+        <div class="nested-links-select-box" id="sections_select_box">
+      <script type="text/javascript" > <!--
+         boostscript.call( boostscript.nested_links, 'select_box',
+            'sections_select_box',
+            '../../sections.xml',
+            '../.././');
+      //--></script>
+</div>
+      </div>
+      <div class="search-box">
+        <form id="cref" action="http://google.com/cse">
+          <div class="search-box-label"></div>
+          <div>
+            <input type="hidden" name="cref" value="http://tinyurl.com/33np8c" />
+            <input class="search-box" type="text" name="q" id="q" size="40" maxlength="255" alt="Search Text" />
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="spirit-nav">
+      <div class="spirit-nav-icon">
+        <a accesskey="p" href="tools.html">
+          <div class="prev-icon"></div>
+        </a>
+      </div>
+      <div class="spirit-nav-icon">
+        <a accesskey="u" href="../sandbox.html">
+          <div class="up-icon"></div>
+        </a>
+      </div>
+      <div class="spirit-nav-icon">
+        <a accesskey="h" href="../../index.html">
+          <div class="home-icon"></div>
+        </a>
+      </div>
+      <div class="spirit-nav-icon">
+        <a accesskey="n" href="outside_docs.html">
+          <div class="next-icon"></div>
+        </a>
+      </div>
+    </div>
+    <div id="body">
+      <div id="body-inner">
+        <div id="content">
+          <div class="section">
+            <div class="titlepage">
+              <div>
+                <div>
+                  <h3 class="title"><a id="filetemplate.sandbox.use"></a><a href="use.html" title=" Use Cases"> Use Cases</a></h3>
+                </div>
+              </div>
+            </div>
+            <p>
+        The following examples illustrate a few tasks you can achieve using the sandbox
+        template by executing the <code class="computeroutput"><span class="identifier">file_template</span><span class="special">.</span><span class="identifier">py</span></code> script
+        from the <code class="computeroutput"><span class="identifier">template</span><span class="special">-</span><span class="identifier">under</span><span class="special">-</span><span class="identifier">construction</span></code> directory of the <a href="tools.html" title=" Configuring the tools and&#10;      checking out the Boost sandbox">Boost
+        Sandbox</a>.
+      </p>
+            <p>
+        <span class="bold"><strong>To start a new sandbox project (the script will ask
+        you for any required information):</strong></span>
+      </p>
+            <div class="programlisting">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="style-switcher-box" id="id413792">
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'insert_style_selector',
+             'id413792',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+</div>
+                  <pre><span class="identifier">python</span> <span class="identifier">file_template</span><span class="special">.</span><span class="identifier">py</span> <span class="identifier">sandbox</span>
+</pre>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        <code class="literal">sandbox</code> specifies the root directory of the template.
+      </p>
+            <p>
+        <span class="bold"><strong>To start a new sandbox project and provide the required
+        information in the <a href="../templates/phases/invocation.html#filetemplate.templates.phases.invocation.command_line" title="&#10;          Command line">command
+        line</a>:</strong></span>
+      </p>
+            <div class="programlisting">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="style-switcher-box" id="id413853">
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'insert_style_selector',
+             'id413853',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+</div>
+                  <pre>python file_template.py sandbox library=my_library "authors=John J. Doe"
+</pre>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        <code class="literal">library</code> and <code class="literal">authors</code> are <a href="reference/options.html" title=" Options">sandbox
+        options</a>.
+      </p>
+            <div class="tip">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="admonition-graphic">
+                    <div class="admonition-icon">
+                      <div class="tip-icon"></div>
+                    </div>
+                  </div>
+                  <div class="admonition-body">
+                    <div class="admonition-title">Tip</div>
+                    <div class="admonition-content">
+                      <p>
+          To include an author with multiple last names, use the <code class="literal">_</code>
+          character instead of spaces (e.g., "authors=Jan De_Man")
+        </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        <span class="bold"><strong>To place the result in a particular destination directory:</strong></span>
+      </p>
+            <div class="programlisting">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="style-switcher-box" id="id413910">
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'insert_style_selector',
+             'id413910',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+</div>
+                  <pre>python file_template.py destination=/boost_sandbox sandbox
+</pre>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        <code class="literal">destination</code> is a <a href="../templates/reference/options.html" title=" Options">global
+        option</a>, and specifies where the result is constructed.
+      </p>
+            <div class="warning">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="admonition-graphic">
+                    <div class="admonition-icon">
+                      <div class="warning-icon"></div>
+                    </div>
+                  </div>
+                  <div class="admonition-body">
+                    <div class="admonition-title">Warning</div>
+                    <div class="admonition-content">
+                      <p>
+          The following use cases are works in progress, and will produce half-baked
+          results. In, particular, generated Xcode IDE projects should contain the
+          correct Targets to invoke bjam on docs, tests, and examples, but they will
+          not reference any of the source files in the project. Also, any existing
+          code integrated into the template (last listed use case) will be intelligently
+          recognized by only some parts of the <a href="../sandbox.html" title=" Boost sandbox template">sandbox
+          template</a>.
+        </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        <span class="bold"><strong>To start a new sandbox project with the optional Xcode
+        and MSVC IDE projects and a non-default documentation format:</strong></span>
+      </p>
+            <div class="programlisting">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="style-switcher-box" id="id413970">
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'insert_style_selector',
+             'id413970',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+</div>
+                  <pre>python file_template.py sandbox library=file_template "authors=Stjepan Rajko" docs=qb xcodeide=y vc8ide=y
+</pre>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        <code class="literal">docs</code>, <code class="literal">xcodeide</code> and <code class="literal">vc8ide</code>
+        are <a href="reference/options.html" title=" Options">sandbox options</a>.
+      </p>
+            <p>
+        <span class="bold"><strong>To integrate existing code into a new sandbox project:</strong></span>
+      </p>
+            <div class="programlisting">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="style-switcher-box" id="id414017">
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'insert_style_selector',
+             'id414017',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+</div>
+                  <pre>python file_template.py sandbox library=my_library "authors=John Doe,Jane Dough" fignore=.hpp fignore=.cpp
+    (...)          /path/to/existing/my_library into=my_library
+</pre>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        <code class="literal">fignore</code> is a <a href="../templates/reference/options.html" title=" Options">template
+        option</a> which will cause the processor to ignore any files in the
+        <a href="../sandbox.html" title=" Boost sandbox template">sandbox template</a> with the specified
+        suffix. <code class="literal">into</code> specifies that the existing my_library code
+        should go into the my_library directory of the destination tree.
+      </p>
+            <p>
+        This assumes that any content under =/path/to/existing/my_library has a structure
+        compatibile with the <a href="../sandbox.html" title=" Boost sandbox template">sandbox template</a>,
+        i.e. something like:
+      </p>
+            <div class="programlisting">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="style-switcher-box" id="id414074">
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'insert_style_selector',
+             'id414074',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+</div>
+                  <pre>/boost
+  /my_library
+ /libs
+  /my_library
+   /doc
+   /test
+   ...
+</pre>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+            <p>
+        If <code class="literal">my_library</code> was the only thing inside <code class="literal">/path/to/existing</code>,
+        we chould just use <code class="literal">/path/to/existing</code> as the template,
+        and omit the <code class="literal">into</code> <a href="../templates/reference/options.html" title=" Options">template
+        option</a>.
+      </p>
+            <a id="filetemplate.sandbox.use.for_more_information___"></a>
+            <h4><a id="id414125"></a>
+        <a href="use.html#filetemplate.sandbox.use.for_more_information___">For more
+        information...</a>
+      </h4>
+            <div class="itemizedlist">
+              <ul>
+                <li><a href="reference/options.html" title=" Options">sandbox options</a>
+          reference
+        </li>
+                <li><a href="reference/substitutions.html" title=" Substitution&#10;        templates">sandbox substitution
+          templates</a> reference
+        </li>
+                <li>
+                  <a href="outside_docs.html" title=" Links to helpful&#10;      outside documentation">links to helpful outside
+          documentation</a>
+                </li>
+              </ul>
+            </div>
+            <a id="filetemplate.sandbox.use.output_of_a_sample_session"></a>
+            <h4><a id="id414189"></a>
+        <a href="use.html#filetemplate.sandbox.use.output_of_a_sample_session">Output
+        of a sample session</a>
+      </h4>
+            <div class="programlisting">
+              <div class="box-outer-wrapper">
+                <div class="box-top-left"></div>
+                <div class="box-top-right"></div>
+                <div class="box-top"></div>
+                <div class="box-inner-wrapper">
+                  <div class="style-switcher-box" id="id414207">
+      <script type="text/javascript" > <!--
+          boostscript.call( boostscript.style_switcher, 'insert_style_selector',
+             'id414207',
+             '../../../../doc/style/html/syntax.xml',
+             '../../../../doc/style/html'
+          );
+      //--></script>
+</div>
+                  <pre>python.exe file_template.py <span class="bold"><strong>sandbox</strong></span>
+/-------------------------------------------
+| Processing template sandbox with options:
++---
+|| {'ignore': set([]), 'template': 'sandbox'}
+|/-------------------------------------------
+|| Examining the template project tree...
+|+---
+|||
+||/-------------------------------------------
+||| Welcome to the Boost Sandbox template.
+||+---
+||/-------------------------------------------
+||| <span class="bold"><strong>Enter value for option library:</strong></span>
+||+---
+||| <span class="bold"><strong>(all lowercase, use underscores to separate words, e.g. "my_library"): my_library</strong></span>
+||/-------------------------------------------
+||| <span class="bold"><strong>Enter value for option authors:
+||+---
+||| (comma separated, no spaces outside names, e.g., "My Name,Notmy R. Name": Stjepan Rajko</strong></span>
+||| $template_library$
+||| $template_library$/boost
+||| $template_library$/boost/$template_library$
+||| $template_library$/libs
+||| $template_library$/libs/$template_library$
+||| $template_library$/libs/$template_library$/build
+||| $template_library$/libs/$template_library$/test
+||| $template_library$/libs/$template_library$/doc
+||| $template_library$/libs/$template_library$/doc\html
+||| $template_library$/libs/$template_library$/doc/html/images
+||| $template_library$/libs/$template_library$/src
+||| $template_library$/libs/$template_library$/example
+/-------------------------------------------
+| Preparing destination tree...
++---
+|/-------------------------------------------
+|| Directories:
+|+---
+|| my_library
+|| my_library/boost
+|| my_library/libs
+|| my_library/boost/my_library
+|| my_library/libs/my_library
+|| my_library/libs/my_library/build
+|| my_library/libs/my_library/test
+|| my_library/libs/my_library/doc
+|| my_library/libs/my_library/src
+|| my_library/libs/my_library/example
+|| my_library/libs/my_library/doc/html
+|| my_library/libs/my_library/doc/html/images
+|/-------------------------------------------
+|| Files:
+|+---
+|| my_library/LICENSE_1_0.txt
+|| my_library/boost-build.jam
+|| my_library/Jamfile.v2
+|| my_library/project-root.jam
+|| my_library/boost/my_library.hpp
+|| my_library/boost/my_library/my_library.hpp
+|| my_library/libs/my_library/test/test.cpp
+|| my_library/libs/my_library/test/Jamfile.v2
+|| my_library/libs/my_library/doc/html/reference.css
+|| my_library/libs/my_library/doc/html/boostbook.css
+|| my_library/libs/my_library/doc/html/images/prev.png
+|| my_library/libs/my_library/doc/html/images/tip.png
+|| my_library/libs/my_library/doc/html/images/important.png
+|| my_library/libs/my_library/doc/html/images/next.png
+|| my_library/libs/my_library/doc/html/images/toc-minus.png
+|| my_library/libs/my_library/doc/html/images/draft.png
+|| my_library/libs/my_library/doc/html/images/caution.png
+|| my_library/libs/my_library/doc/html/images/Thumbs.db
+|| my_library/libs/my_library/doc/html/images/up.png
+|| my_library/libs/my_library/doc/html/images/note.png
+|| my_library/libs/my_library/doc/html/images/warning.png
+|| my_library/libs/my_library/doc/html/images/toc-plus.png
+|| my_library/libs/my_library/doc/html/images/blank.png
+|| my_library/libs/my_library/doc/html/images/home.png
+|| my_library/libs/my_library/doc/html/images/toc-blank.png
+|| my_library/libs/my_library/example/example.cpp
+|| my_library/libs/my_library/example/Jamfile.v2
+|| my_library/libs/my_library/doc/my_library.qbk
+|| my_library/libs/my_library/doc/Jamfile.v2
+/-------------------------------------------
+| Creating file tree from template...
++---
+|/-------------------------------------------
+|| Python files...
+|+---
+||| ./my_library/libs/my_library/doc/my_library.qbk
+||| ./my_library/libs/my_library/doc/Jamfile.v2
+|/-------------------------------------------
+|| Files...
+|+---
+||| ./my_library/LICENSE_1_0.txt
+||| ./my_library/boost-build.jam
+||| ./my_library/Jamfile.v2
+||| ./my_library/project-root.jam
+||| ./my_library/boost/my_library.hpp
+||| ./my_library/boost/my_library/my_library.hpp
+||| ./my_library/libs/my_library/test/test.cpp
+||| ./my_library/libs/my_library/test/Jamfile.v2
+||| ./my_library/libs/my_library/doc/html/reference.css
+||| ./my_library/libs/my_library/doc/html/boostbook.css
+||| ./my_library/libs/my_library/doc/html/images/prev.png
+||| ./my_library/libs/my_library/doc/html/images/tip.png
+||| ./my_library/libs/my_library/doc/html/images/important.png
+||| ./my_library/libs/my_library/doc/html/images/next.png
+||| ./my_library/libs/my_library/doc/html/images/toc-minus.png
+||| ./my_library/libs/my_library/doc/html/images/draft.png
+||| ./my_library/libs/my_library/doc/html/images/caution.png
+||| ./my_library/libs/my_library/doc/html/images/Thumbs.db
+||| ./my_library/libs/my_library/doc/html/images/up.png
+||| ./my_library/libs/my_library/doc/html/images/note.png
+||| ./my_library/libs/my_library/doc/html/images/warning.png
+||| ./my_library/libs/my_library/doc/html/images/toc-plus.png
+||| ./my_library/libs/my_library/doc/html/images/blank.png
+||| ./my_library/libs/my_library/doc/html/images/home.png
+||| ./my_library/libs/my_library/doc/html/images/toc-blank.png
+||| ./my_library/libs/my_library/example/example.cpp
+||| ./my_library/libs/my_library/example/Jamfile.v2
+</pre>
+                </div>
+                <div class="box-bottom-left"></div>
+                <div class="box-bottom-right"></div>
+                <div class="box-bottom"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>
+    <div class="spirit-nav">
+      <div class="spirit-nav-icon">
+        <a accesskey="p" href="tools.html">
+          <div class="prev-icon"></div>
+        </a>
+      </div>
+      <div class="spirit-nav-icon">
+        <a accesskey="u" href="../sandbox.html">
+          <div class="up-icon"></div>
+        </a>
+      </div>
+      <div class="spirit-nav-icon">
+        <a accesskey="h" href="../../index.html">
+          <div class="home-icon"></div>
+        </a>
+      </div>
+      <div class="spirit-nav-icon">
+        <a accesskey="n" href="outside_docs.html">
+          <div class="next-icon"></div>
+        </a>
+      </div>
+    </div>
+    <div id="footer">
+      <div id="footer-left">
+        <div id="copyright">
+          <p>Copyright © 2007 Stjepan Rajko</p>
+        </div>
+        <div id="license">
+          <p>Distributed under the
+                  <a href="../../../../LICENSE_1_0.txt" class="internal">Boost Software License, Version 1.0</a>.
+               </p>
+        </div>
+      </div>
+      <div id="footer-right">
+        <div id="banners">
+          <p id="banner-xhtml">
+            <a href="http://validator.w3.org/check?uri=referer" class="external">XHTML 1.0</a>
+          </p>
+          <p id="banner-css">
+            <a href="http://jigsaw.w3.org/css-validator/check/referer" class="external">CSS</a>
+          </p>
+          <p id="banner-sourceforge">
+            <a href="http://sourceforge.net" class="external">SourceForge</a>
+          </p>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+  </body>
+</html>
