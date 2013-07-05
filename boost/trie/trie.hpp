@@ -17,7 +17,9 @@ namespace boost { namespace tries {
 namespace detail {
 
 template <typename Key, typename Value,
-		 class Compare>
+		 class Compare/*,
+		 // only one value, so alloc maybe unnecessary
+		 class Alloc = alloc*/>
 struct trie_node {
 //protected:
 	typedef Key key_type;
@@ -26,9 +28,11 @@ struct trie_node {
 	typedef value_type* value_ptr;
 	typedef trie_node<key_type, value_type, Compare> node_type;
 	typedef node_type* node_ptr;
+	// maybe the pointer container of children could be defined by user?!
 	typedef std::map<key_type, node_ptr, Compare> children_type;
+
 	typedef typename children_type::iterator child_iter;
-	typedef std::allocator<Value> value_allocator; // is it necessary here?
+	//typedef std::allocator<Value> value_allocator; // is it necessary here?
 
 	children_type child;
 
@@ -39,6 +43,7 @@ struct trie_node {
 	size_t node_count;
 	size_t value_count;
 
+	/*
 	value_ptr new_value()
 	{
 		return value = value_allocator::allocate();
@@ -56,6 +61,7 @@ struct trie_node {
 	{
 		value_allocator::deallocate();
 	}
+	*/
 
 	trie_node() : value(0), parent(0), node_count(0), value_count(0) 
 	{
@@ -136,27 +142,49 @@ class trie {
 public:
 	typedef Key key_type;
 	typedef Value value_type;
+	typedef value_type* value_ptr;
 	typedef trie<key_type, value_type, Compare> trie_type;
 	typedef typename detail::trie_node<key_type, value_type, Compare> node_type;
 	typedef key_type * key_ptr;
 	typedef node_type * node_ptr;
 	typedef std::allocator< node_type > trie_node_allocator;
+	typedef std::allocator< value_type > value_allocator;
 	typedef size_t size_type;
+
+	trie_node_allocator trie_node_alloc;
+	value_allocator value_alloc;
 
 	node_ptr root;
 	size_type node_count;
 	size_type value_count;
 
+	value_ptr new_value()
+	{
+		return value_alloc.allocate(1);
+	}
+
+	void delete_value(value_ptr p)
+	{
+		if (p)
+		{
+			value_alloc.destroy(p);
+			value_alloc.deallocate(p, 1);
+		}
+	}
+
 	node_ptr new_node() 
 	{
-		return trie_node_allocator::allocate(sizeof(node_type));
+		return trie_node_alloc.allocate(1);
 	}
 
 	void delete_node(node_ptr p)
 	{
-		// 
-		destroy(p);
-		trie_node_allocator::deallocate(p);
+		delete_value(p->value);
+		if (p)
+		{
+			trie_node_alloc.destroy(p);
+			trie_node_alloc.deallocate(p, 1);
+		}
 	}
 
 	node_type& leftmost() const
@@ -175,10 +203,14 @@ public:
 	// iterators still unavailable here
 	
 	trie() {
+		//trie_node_alloc();
+		//value_alloc();
 		root = new_node();
 	}
 
+
 	typedef detail::trie_iterator<Key, Value, Compare> iterator;
+
 
 	iterator begin()
 	{
@@ -221,7 +253,7 @@ public:
 		return __insert(container.begin(), container.end());
 	}
 
-	static void clear(node_ptr cur)
+	void clear(node_ptr cur)
 	{
 		typename node_type::child_iter ci = cur->child.begin();
 		// end() may take time to calc
