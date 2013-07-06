@@ -70,6 +70,7 @@ struct trie_node {
 
 	~trie_node()
 	{
+		child.clear();
 	}
 };
 
@@ -180,8 +181,8 @@ public:
 	node_ptr create_node() 
 	{
 		node_ptr tmp = get_node();
-		trie_node_alloc.construct(tmp, node_type());
-		return trie_node_alloc.allocate(1);
+		new(tmp) node_type();
+		return tmp;
 	}
 
 	void delete_node(node_ptr p)
@@ -209,10 +210,7 @@ public:
 public:
 	// iterators still unavailable here
 	
-	trie() {
-		//trie_node_alloc();
-		//value_alloc();
-		root = get_node();
+	trie() : root(create_node()) {
 	}
 
 
