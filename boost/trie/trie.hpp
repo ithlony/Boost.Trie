@@ -102,7 +102,7 @@ struct trie_iterator
 
 	ref operator*() const 
 	{
-		return node->value;
+		return *node->value;
 	}
 	ptr operator->() const
 	{
@@ -172,8 +172,15 @@ public:
 		}
 	}
 
-	node_ptr new_node() 
+	node_ptr get_node() 
 	{
+		return trie_node_alloc.allocate(1);
+	}
+
+	node_ptr create_node() 
+	{
+		node_ptr tmp = get_node();
+		trie_node_alloc.construct(tmp, node_type());
 		return trie_node_alloc.allocate(1);
 	}
 
@@ -205,11 +212,12 @@ public:
 	trie() {
 		//trie_node_alloc();
 		//value_alloc();
-		root = new_node();
+		root = get_node();
 	}
 
 
 	typedef detail::trie_iterator<Key, Value, Compare> iterator;
+	typedef std::pair<iterator, bool> pair_iterator_bool;
 
 
 	iterator begin()
@@ -223,34 +231,52 @@ public:
 	}
 
 	template<typename Iter>
-	iterator __insert(Iter first, Iter last,
+	iterator __insert(node_ptr cur, Iter first, Iter last,
+			const value_type& value)
+	{
+		for (; first != last; ++first)
+		{
+			const key_type& cur_key = *first;
+			node_ptr new_node = create_node();
+			new_node->parent = cur;
+			typename node_type::child_iter ci = cur->child.insert(std::make_pair(cur_key, new_node)).first;
+			cur = ci->second;
+		}
+		cur->value = new_value();
+		value_alloc.construct(cur->value, value);
+		++value_count;
+		return cur;
+	}
+
+	template<typename Iter>
+	pair_iterator_bool insert_unique(Iter first, Iter last,
 			const value_type& value)
 	{
 		node_ptr cur = root;
 		for (; first != last; ++first)
 		{
 			const key_type& cur_key = *first;
-			typename node_type::child_iter ci = cur->child.find(cur->child[cur_key]);
+			typename node_type::child_iter ci = cur->child.find(cur_key);
 			if (ci == cur->child.end())
 			{
-				node_ptr new_node = new_node();
-				ci = cur->child.insert(std::make_pair(cur_key, new_node)).first;
-				new_node->parent = cur;
+				return std::make_pair(__insert(cur, first, last, value), true);
 			}
-			cur = *ci;
+			cur = ci->second;
 		}
 		// this should be changed to adapt to single value
 		if (!cur->value)
+		{
 			++value_count;
-		cur->new_value(value);
+			return std::make_pair(__insert(cur, first, last, value), true);
+		}
 
-		return cur;
+		return std::make_pair((iterator)cur, false);
 	}
 
 	template<typename Container>
-	iterator insert(Container &container)
+	pair_iterator_bool insert_unique(const Container &container, const value_type& value)
 	{
-		return __insert(container.begin(), container.end());
+		return insert_unique(container.begin(), container.end(), value);
 	}
 
 	void clear(node_ptr cur)
@@ -303,7 +329,7 @@ protected:
 	trie_type t;
 
 public:
-	trie_map()
+	trie_map() 
 	{
 	}
 
@@ -311,13 +337,13 @@ public:
 	template<typename Container>
 	value_type& operator [] (const Container& container)
 	{
-		return *(insert(container, value_type()));
+		return *(t.insert_unique(container, value_type()).first);
 	}
 
 	template<typename Container>
-	iterator insert(const Container& container)
+	iterator insert(const Container& container, const value_type& value)
 	{
-		return t.insert(container);
+		return t.insert_unique(container, value);
 	}
 
 	~trie_map()
