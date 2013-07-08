@@ -11,6 +11,7 @@
 #include <utility>
 #include <cstdio>
 #include <memory>
+#include <iostream>
 
 namespace boost { namespace tries {
 
@@ -105,9 +106,20 @@ struct trie_iterator
 	{
 		return *node->value;
 	}
+
 	ptr operator->() const
 	{
 		return &(operator*()); 
+	}
+
+	bool operator==(const trie_iterator& other)
+	{
+		return node == other.node;
+	}
+
+	bool operator!=(const trie_iterator& other)
+	{
+		return node != other.node;
 	}
 
 	self& operator++() 
@@ -213,17 +225,25 @@ public:
 	trie() : root(create_node()) {
 	}
 
-
 	typedef detail::trie_iterator<Key, Value, Compare> iterator;
 	typedef std::pair<iterator, bool> pair_iterator_bool;
 
-
-	iterator begin()
+	iterator begin() const
 	{
 		return leftmost();
 	}
 
-	iterator end()
+	iterator end() const
+	{
+		return root;
+	}
+
+	iterator rbegin() const
+	{
+		return rightmost();
+	}
+
+	iterator rend() const
 	{
 		return root;
 	}
@@ -277,6 +297,31 @@ public:
 		return insert_unique(container.begin(), container.end(), value);
 	}
 
+// find 
+	template<typename Iter>
+	iterator find(Iter first, Iter last)
+	{
+		node_ptr cur = root;
+		for (; first != last; ++first)
+		{
+			const key_type& cur_key = *first;
+			typename node_type::child_iter ci = cur->child.find(cur_key);
+			if (ci == cur->child.end())
+			{
+				return end();
+			}
+			cur = ci->second;
+		}
+		// this should be changed to adapt to single value
+		return cur;
+	}
+
+	template<typename Container>
+	iterator find(const Container &container)
+	{
+		return find(container.begin(), container.end());
+	}
+
 	void clear(node_ptr cur)
 	{
 		typename node_type::child_iter ci = cur->child.begin();
@@ -299,7 +344,7 @@ public:
 		return value_count == 0;
 	}
 
-	bool destroy()
+	void destroy()
 	{
 		clear(root);
 		delete_node(root);
@@ -321,6 +366,7 @@ public:
 	typedef Value value_type;
 	typedef trie<key_type, value_type, Compare> trie_type;
 	typedef typename trie_type::iterator iterator;
+	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
 	typedef size_t size_type;
 
 protected:
@@ -331,6 +377,25 @@ public:
 	{
 	}
 
+	iterator begin() const 
+	{
+		return t.begin();
+	}
+
+	iterator end() const
+	{
+		return t.end();
+	}
+
+	iterator rbegin() const 
+	{
+		return t.rbegin();
+	}
+
+	iterator rend() const
+	{
+		return t.rend();
+	}
 
 	template<typename Container>
 	value_type& operator [] (const Container& container)
@@ -338,10 +403,28 @@ public:
 		return *(t.insert_unique(container, value_type()).first);
 	}
 
+	template<typename Iter>
+	pair_iterator_bool insert(Iter first, Iter last, const value_type& value)
+	{
+		return t.insert_unique(first, last, value);
+	}
+
 	template<typename Container>
-	iterator insert(const Container& container, const value_type& value)
+	pair_iterator_bool insert(const Container& container, const value_type& value)
 	{
 		return t.insert_unique(container, value);
+	}
+
+	template<typename Iter>
+	iterator find(Iter first, Iter last)
+	{
+		return t.find(first, last);
+	}
+
+	template<typename Container>
+	iterator find(const Container& container)
+	{
+		return t.find(container);
 	}
 
 	~trie_map()

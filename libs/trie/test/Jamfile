@@ -8,9 +8,8 @@ import testing ;
 
 project
     : requirements 
-      <include>../../..
       <define>BOOST_ALL_NO_LIB=1
-    ;
+		<include>%BOOST_ROOT%
+	;
 
-run test_nothing.cpp ;
-run test_nothing_n.cpp ;
+run test.cpp ;
