@@ -1,0 +1,6 @@
+Running 2 test cases...
+test.cpp(17): error in "operator_test": check t[s] == 1 failed
+
+*** 1 failure detected in test suite "trie_test"
+ 
+EXIT STATUS: 201 
