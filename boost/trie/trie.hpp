@@ -33,36 +33,18 @@ struct trie_node {
 	typedef std::map<key_type, node_ptr, Compare> children_type;
 
 	typedef typename children_type::iterator child_iter;
-	//typedef std::allocator<Value> value_allocator; // is it necessary here?
 
 	children_type child;
 
 //public:
 	value_ptr value; // use unique_ptr here?
 	node_ptr parent;
+	key_type key_elem;
 	//child_iter child_iter_of_parent;
 	size_t node_count;
 	size_t value_count;
 
-	/*
-	value_ptr new_value()
-	{
-		return value = value_allocator::allocate();
-	}
 
-	value_ptr new_value(const value_type& value)
-	{
-		if (!value)
-			value = value_allocator::allocate();
-		construct(value, value);
-		return value;
-	}
-
-	void delete_value()
-	{
-		value_allocator::deallocate();
-	}
-	*/
 
 	trie_node() : value(0), parent(0), node_count(0), value_count(0) 
 	{
@@ -73,6 +55,7 @@ struct trie_node {
 	{
 		child.clear();
 	}
+
 };
 
 template <typename Key, typename Value, class Compare>
@@ -122,14 +105,80 @@ struct trie_iterator
 		return node != other.node;
 	}
 
+	// handle the increment of begin()
+	void increment()
+	{
+		node_ptr cur = node;
+		if (!cur->child.empty())
+		{ // go down to the first node with a value in it, and there always be at least one
+			do {
+				cur = cur->child.begin()->second;
+			} while (cur->value == NULL);
+			node = cur;
+		} else {
+			// go up till there is a sibling next to cur
+			// the algorithm here is not so efficient
+			while (cur->parent != NULL)
+			{
+				node_ptr p = cur->parent;
+				typename node_type::child_iter ci = p->child.find(cur->key_elem);
+				++ci;
+				if (ci != p->child.end())
+				{
+					cur = ci->second;
+					while (cur->value == NULL) {
+						cur = cur->child.begin()->second;
+					}
+					break;
+				}
+				cur = p;
+			}
+			node = cur;
+		}
+	}
+
+	// handle the decrement of end()
+	void decrement()
+	{
+		node_ptr cur = node;
+		if (!cur->child.empty())
+		{ // go down to the first node with a value in it, and there always be at least one
+			do {
+				cur = cur->child.rbegin()->second;
+			} while (cur->value == NULL);
+			node = cur;
+		} else {
+			// go up till there is a sibling next to cur
+			// the algorithm here is not so efficient
+			while (cur->parent != NULL)
+			{
+				node_ptr p = cur->parent;
+				typename node_type::child_iter ci = p->child.find(cur->key_elem);
+				if (ci != p->child.begin())
+				{
+					--ci;
+					cur = ci->second;
+					while (cur->value == NULL) {
+						cur = cur->child.begin()->second;
+					}
+					node = cur;
+				}
+				cur = p;
+			}
+			node = cur;
+		}
+	}
+
 	self& operator++() 
 	{
+		increment();
 		// increment
 		return *this;
 	}
 	self& operator++(int)
 	{
 		self tmp = *this;
+		increment();
 		// increment
 		return tmp;
 	}
@@ -207,22 +256,30 @@ public:
 		}
 	}
 
-	node_type& leftmost() const
+	// need constant time to get leftmost
+	node_ptr leftmost() const
 	{
-		// to be written
-		return NULL;
+		if (empty())
+			return root;
+		node_ptr cur = root;
+		while (cur->value == NULL)
+		{
+			cur = cur->child.begin()->second;
+		}
+		return cur;
 	}
 
-	node_type& rightmost() const
+	node_ptr& rightmost() const
 	{
 		// to be written
-		return NULL;
+		return root;
 	}
 
 public:
 	// iterators still unavailable here
 	
-	trie() : root(create_node()) {
+	trie() : root(create_node()), value_count(0), node_count(0) {
+		//root.parent = &root;
 	}
 
 	typedef detail::trie_iterator<Key, Value, Compare> iterator;
@@ -257,6 +314,7 @@ public:
 			const key_type& cur_key = *first;
 			node_ptr new_node = create_node();
 			new_node->parent = cur;
+			new_node->key_elem = cur_key;
 			typename node_type::child_iter ci = cur->child.insert(std::make_pair(cur_key, new_node)).first;
 			cur = ci->second;
 		}
@@ -425,6 +483,16 @@ public:
 	iterator find(const Container& container)
 	{
 		return t.find(container);
+	}
+
+	size_t size()
+	{
+		return t.size();
+	}
+
+	bool empty()
+	{
+		return t.empty();
 	}
 
 	~trie_map()

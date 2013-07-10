@@ -1,6 +1,12 @@
-Running 2 test cases...
-test.cpp(17): error in "operator_test": check t[s] == 1 failed
+Running 3 test cases...
+kaka
+haha
+haha
+haha
+wawa
+haha
+haha
 
-*** 1 failure detected in test suite "trie_test"
+*** No errors detected
  
-EXIT STATUS: 201 
+EXIT STATUS: 0 
