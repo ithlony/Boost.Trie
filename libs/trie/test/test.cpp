@@ -1,6 +1,5 @@
 #define BOOST_TEST_MODULE trie_test
 #include <boost/test/unit_test.hpp>
-// test include guard
 #include "boost/trie/trie.hpp"
 #include "boost/trie/trie.hpp"
 #include <string>
@@ -53,23 +52,51 @@ BOOST_AUTO_TEST_CASE(iterator_operator_plus)
 	t[s1] = 2;
 	t[s2] = 3;
 	BOOST_CHECK(t.begin() != t.end());
-	std::cout << "kaka" << std::endl;
 	boost::tries::trie_map<char, int>::iterator ti;
 	ti = t.begin();
-	std::cout << "haha" << std::endl;
 	BOOST_CHECK(*ti == 1);
-	std::cout << "haha" << std::endl;
 	++ti;
 	BOOST_CHECK(*ti == 2);
-	std::cout << "haha" << std::endl;
 	BOOST_CHECK(t[s2] == 3);
-	std::cout << "wawa" << std::endl;
 	++ti;
 	BOOST_CHECK(*ti == 3);
-	std::cout << "haha" << std::endl;
 	++ti;
-	std::cout << "haha" << std::endl;
 	BOOST_CHECK(ti == t.end());
+	// test ++end()
+	++ti;
+	BOOST_CHECK(ti == t.end());
+}
+
+BOOST_AUTO_TEST_CASE(iterator_operator_minus)
+{
+	boost::tries::trie_map<char, int> t;
+	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
+	BOOST_CHECK(t.empty() == true);
+	BOOST_CHECK(t.size() == 0);
+	BOOST_CHECK(t.begin() == t.end());
+	t[s] = 1;
+	t[s1] = 2;
+	t[s2] = 3;
+	BOOST_CHECK(t.begin() != t.end());
+	boost::tries::trie_map<char, int>::iterator ti;
+	ti = t.begin();
+	BOOST_CHECK(*ti == 1);
+	--ti;
+	BOOST_CHECK(ti == t.end());
+	BOOST_CHECK(t[s2] == 3);
+	--ti;
+	BOOST_CHECK(*ti == 3);
+	t[s3] = 4;
+	++ti;
+	BOOST_CHECK(*ti == 4);
+	++ti;
+	BOOST_CHECK(ti == t.end());
+	++ti;
+	BOOST_CHECK(ti == t.end());
+	--ti;
+	BOOST_CHECK(*ti == 4);
+	BOOST_CHECK(t.node_count() == 8);
+	BOOST_CHECK(t.size() == 4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

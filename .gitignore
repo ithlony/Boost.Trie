@@ -21,3 +21,6 @@ makefile
 # Build artifacts are put here by bjam
 */bin.v2/*
 */bin/*
+
+!jamroot
+!jamfile

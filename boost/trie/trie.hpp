@@ -40,10 +40,11 @@ struct trie_node {
 	value_ptr value; // use unique_ptr here?
 	node_ptr parent;
 	key_type key_elem;
-	//child_iter child_iter_of_parent;
+	// store the iterator to optimize operator++ and operator--
+	// utilize that the iterator in map does not change after insertion
+	child_iter child_iter_of_parent;
 	size_t node_count;
 	size_t value_count;
-
 
 
 	trie_node() : value(0), parent(0), node_count(0), value_count(0) 
@@ -105,9 +106,11 @@ struct trie_iterator
 		return node != other.node;
 	}
 
-	// handle the increment of begin()
 	void increment()
 	{
+		// at iterator end
+		if (node->parent == NULL)
+			return;
 		node_ptr cur = node;
 		if (!cur->child.empty())
 		{ // go down to the first node with a value in it, and there always be at least one
@@ -121,7 +124,7 @@ struct trie_iterator
 			while (cur->parent != NULL)
 			{
 				node_ptr p = cur->parent;
-				typename node_type::child_iter ci = p->child.find(cur->key_elem);
+				typename node_type::child_iter ci = cur->child_iter_of_parent;
 				++ci;
 				if (ci != p->child.end())
 				{
@@ -137,36 +140,47 @@ struct trie_iterator
 		}
 	}
 
-	// handle the decrement of end()
 	void decrement()
 	{
 		node_ptr cur = node;
-		if (!cur->child.empty())
-		{ // go down to the first node with a value in it, and there always be at least one
-			do {
-				cur = cur->child.rbegin()->second;
-			} while (cur->value == NULL);
-			node = cur;
-		} else {
-			// go up till there is a sibling next to cur
-			// the algorithm here is not so efficient
-			while (cur->parent != NULL)
+		// handle the decrement of end()
+		if (cur->parent == NULL)
+		{
+			while (!cur->child.empty())
 			{
-				node_ptr p = cur->parent;
-				typename node_type::child_iter ci = p->child.find(cur->key_elem);
-				if (ci != p->child.begin())
-				{
-					--ci;
-					cur = ci->second;
-					while (cur->value == NULL) {
-						cur = cur->child.begin()->second;
-					}
-					node = cur;
-				}
-				cur = p;
+				cur = cur->child.rbegin()->second;
 			}
 			node = cur;
+			return;
 		}
+		node_ptr p = cur->parent;
+		typename node_type::child_iter ci = cur->child_iter_of_parent;
+		while (p != NULL && ci == p->child.begin() && p->value == NULL)
+		{
+			cur = p;
+			p = cur->parent;
+			ci = cur->child_iter_of_parent;
+		}
+		// root
+		if (p == NULL)
+		{
+			node = cur;
+			return;
+		}
+		// go down the trie
+		if (ci != p->child.begin())
+		{
+			--ci;
+			cur = ci->second;
+			while (!cur->child.empty())
+			{
+				cur = cur->child.rbegin()->second;
+			}
+			node = cur;
+			return;
+		}
+		// to parent p->value != NULL
+		node = p;
 	}
 
 	self& operator++() 
@@ -175,7 +189,7 @@ struct trie_iterator
 		// increment
 		return *this;
 	}
-	self& operator++(int)
+	self operator++(int)
 	{
 		self tmp = *this;
 		increment();
@@ -186,12 +200,13 @@ struct trie_iterator
 	self& operator--()
 	{
 		// decrement
+		decrement();
 		return *this;
 	}
-	self& operator--(int)
+	self operator--(int)
 	{
 		self tmp = *this;
-		// decrement
+		decrement();
 		return tmp;
 	}
 }; 
@@ -246,6 +261,13 @@ public:
 		return tmp;
 	}
 
+	node_ptr create_node(const value_type& value) 
+	{
+		node_ptr tmp = get_node();
+		value_alloc.construct(tmp, value);
+		return tmp;
+	}
+
 	void delete_node(node_ptr p)
 	{
 		delete_value(p->value);
@@ -271,8 +293,14 @@ public:
 
 	node_ptr& rightmost() const
 	{
-		// to be written
-		return root;
+		if (empty())
+			return root;
+		node_ptr cur = root;
+		while (cur->value == NULL)
+		{
+			cur = cur->child.rbegin()->second;
+		}
+		return cur;
 	}
 
 public:
@@ -313,9 +341,11 @@ public:
 		{
 			const key_type& cur_key = *first;
 			node_ptr new_node = create_node();
+			++node_count;
 			new_node->parent = cur;
 			new_node->key_elem = cur_key;
 			typename node_type::child_iter ci = cur->child.insert(std::make_pair(cur_key, new_node)).first;
+			new_node->child_iter_of_parent = ci;
 			cur = ci->second;
 		}
 		cur->value = new_value();
@@ -485,7 +515,12 @@ public:
 		return t.find(container);
 	}
 
-	size_t size()
+	size_type node_count()
+	{
+		return t.node_count;
+	}
+
+	size_type size()
 	{
 		return t.size();
 	}
