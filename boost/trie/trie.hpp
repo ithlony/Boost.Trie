@@ -43,13 +43,33 @@ struct trie_node {
 	// store the iterator to optimize operator++ and operator--
 	// utilize that the iterator in map does not change after insertion
 	child_iter child_iter_of_parent;
+	/*
 	size_t node_count;
 	size_t value_count;
+	*/
 
-
-	trie_node() : value(0), parent(0), node_count(0), value_count(0) 
+	explicit trie_node() : value(0), parent(0) 
 	{
 		child.clear();
+	}
+
+	void assign(const trie_node& x)
+	{
+		child = x.child;
+		value = x.value;
+		parent = x.parent;
+		key_elem = x.key_elem;
+		child_iter_of_parent = x.child_iter_of_parent;
+	}
+
+	explicit trie_node(const trie_node& x)
+	{
+		assign(x);
+	}
+
+	trie_node& operator=(const trie_node& x)
+	{
+		assign(x);
 	}
 
 	~trie_node()
@@ -59,15 +79,16 @@ struct trie_node {
 
 };
 
-template <typename Key, typename Value, class Compare>
+template <typename Key, typename Value, typename Reference, typename Pointer, class Compare>
 struct trie_iterator
 {
-	//typedef std::bidirectional_iterator_tag iterator_category;
+	typedef std::bidirectional_iterator_tag iterator_category;
 	typedef Key key_type;
 	typedef Value value_type;
-	typedef value_type& ref;
-	typedef value_type* ptr;
-	typedef trie_iterator<Key, Value, Compare> iterator;
+	typedef Reference ref;
+	typedef Pointer ptr;
+	typedef trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
+	typedef trie_iterator<Key, Value, const Value&, const Value*, Compare> const_iterator;
 	typedef trie_node<Key, Value, Compare> node_type;
 	typedef iterator self;
 	typedef node_type* node_ptr;
@@ -306,14 +327,24 @@ public:
 public:
 	// iterators still unavailable here
 	
-	trie() : root(create_node()), value_count(0), node_count(0) {
-		//root.parent = &root;
+	explicit trie() : root(create_node()), node_count(0), value_count(0) 
+	{
 	}
 
-	typedef detail::trie_iterator<Key, Value, Compare> iterator;
+	explicit trie(const trie_type& t) : value_count(t.value_count), node_count(t.node_count)
+	{
+	}
+
+	typedef detail::trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
+	typedef typename iterator::const_iterator const_iterator;
 	typedef std::pair<iterator, bool> pair_iterator_bool;
 
 	iterator begin() const
+	{
+		return leftmost();
+	}
+
+	const_iterator cbegin() const
 	{
 		return leftmost();
 	}
@@ -454,6 +485,7 @@ public:
 	typedef Value value_type;
 	typedef trie<key_type, value_type, Compare> trie_type;
 	typedef typename trie_type::iterator iterator;
+	typedef typename trie_type::const_iterator const_iterator;
 	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
 	typedef size_t size_type;
 
@@ -461,13 +493,18 @@ protected:
 	trie_type t;
 
 public:
-	trie_map() 
+	explicit trie_map() 
 	{
 	}
 
 	iterator begin() const 
 	{
 		return t.begin();
+	}
+
+	const_iterator cbegin() const 
+	{
+		return t.cbegin();
 	}
 
 	iterator end() const

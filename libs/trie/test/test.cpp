@@ -79,8 +79,13 @@ BOOST_AUTO_TEST_CASE(iterator_operator_minus)
 	t[s2] = 3;
 	BOOST_CHECK(t.begin() != t.end());
 	boost::tries::trie_map<char, int>::iterator ti;
+	boost::tries::trie_map<char, int>::const_iterator cti(t.end());
 	ti = t.begin();
 	BOOST_CHECK(*ti == 1);
+	*ti = 10;
+	BOOST_CHECK(*ti == 10);
+	cti = t.begin();
+	BOOST_CHECK(*cti == 10);
 	--ti;
 	BOOST_CHECK(ti == t.end());
 	BOOST_CHECK(t[s2] == 3);
