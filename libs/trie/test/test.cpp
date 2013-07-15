@@ -104,4 +104,88 @@ BOOST_AUTO_TEST_CASE(iterator_operator_minus)
 	BOOST_CHECK(t.size() == 4);
 }
 
+BOOST_AUTO_TEST_CASE(clear)
+{
+	boost::tries::trie_map<char, int> t;
+	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
+	t[s] = t[s1] = t[s2] = t[s3] = 10;
+	int node_cnt = t.node_count();
+	BOOST_CHECK(t.size() == 4);
+	BOOST_CHECK(t.node_count() == node_cnt);
+	t.clear();
+	BOOST_CHECK(t.size() == 0);
+	BOOST_CHECK(t.node_count() == 0);
+	BOOST_CHECK(t[s] == 0);
+	BOOST_CHECK(t.size() == 1);
+	BOOST_CHECK(t.node_count() == 3);
+}
+
+BOOST_AUTO_TEST_CASE(erase_iterator)
+{
+	boost::tries::trie_map<char, int> t;
+	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
+	t[s] = 1;
+	t[s1] = 2;
+	t[s2] = 3;
+	t[s3] = 4;
+	int node_cnt = t.node_count();
+	BOOST_CHECK(t.size() == 4);
+	std::cout << t.size() << ' ' << t.node_count() << std::endl;
+	BOOST_CHECK(t.node_count() == node_cnt);
+	std::cout << *t.begin() << std::endl;
+	boost::tries::trie_map<char, int>::iterator ti;
+	ti = t.begin();
+	t.erase(t.begin());
+	ti = t.begin();
+	BOOST_CHECK(t.size() == 3);
+	BOOST_CHECK(t.node_count() == 8);
+	BOOST_CHECK(*ti == 2);
+	t.erase(ti);
+	BOOST_CHECK(t.size() == 2);
+	ti = t.begin();
+	BOOST_CHECK(*ti == 3);
+	BOOST_CHECK(t.node_count() == 6);
+	BOOST_CHECK(t[s] == 0);
+	ti = t.begin();
+	BOOST_CHECK(t.size() == 3);
+	BOOST_CHECK(*ti == 0);
+	BOOST_CHECK(t.node_count() == 7);
+}
+
+BOOST_AUTO_TEST_CASE(erase_key)
+{
+	boost::tries::trie_map<char, int> t;
+	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
+	t[s] = 1;
+	t[s1] = 2;
+	t[s2] = 3;
+	t[s3] = 4;
+	int node_cnt = t.node_count();
+	BOOST_CHECK(t.size() == 4);
+	std::cout << t.size() << ' ' << t.node_count() << std::endl;
+	BOOST_CHECK(t.node_count() == node_cnt);
+	std::cout << *t.begin() << std::endl;
+	boost::tries::trie_map<char, int>::iterator ti;
+	ti = t.begin();
+	t.erase(s);
+	ti = t.begin();
+	BOOST_CHECK(t.size() == 3);
+	BOOST_CHECK(t.node_count() == 8);
+	BOOST_CHECK(*ti == 2);
+	t.erase(s1);
+	BOOST_CHECK(t.size() == 2);
+	ti = t.begin();
+	BOOST_CHECK(*ti == 3);
+	BOOST_CHECK(t.node_count() == 6);
+	BOOST_CHECK(t[s] == 0);
+	ti = t.begin();
+	BOOST_CHECK(t.size() == 3);
+	BOOST_CHECK(*ti == 0);
+	BOOST_CHECK(t.node_count() == 7);
+	t.erase(std::string("bababa"));
+	ti = t.begin();
+	BOOST_CHECK(t.size() == 3);
+	BOOST_CHECK(*ti == 0);
+	BOOST_CHECK(t.node_count() == 7);
+}
 BOOST_AUTO_TEST_SUITE_END()

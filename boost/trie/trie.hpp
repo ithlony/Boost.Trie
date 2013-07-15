@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <memory>
 #include <iostream>
+#include <stack>
 
 namespace boost { namespace tries {
 
@@ -267,6 +268,7 @@ public:
 		{
 			value_alloc.destroy(p);
 			value_alloc.deallocate(p, 1);
+			--value_count;
 		}
 	}
 
@@ -291,11 +293,12 @@ public:
 
 	void delete_node(node_ptr p)
 	{
-		delete_value(p->value);
 		if (p)
 		{
+			delete_value(p->value);
 			trie_node_alloc.destroy(p);
 			trie_node_alloc.deallocate(p, 1);
+			--node_count;
 		}
 	}
 
@@ -403,7 +406,6 @@ public:
 		// this should be changed to adapt to single value
 		if (!cur->value)
 		{
-			++value_count;
 			return std::make_pair(__insert(cur, first, last, value), true);
 		}
 
@@ -431,7 +433,9 @@ public:
 			}
 			cur = ci->second;
 		}
-		// this should be changed to adapt to single value
+		// different from find_range
+		if (cur->value == NULL)
+			return end();
 		return cur;
 	}
 
@@ -441,17 +445,84 @@ public:
 		return find(container.begin(), container.end());
 	}
 
+	void erase(iterator it)
+	{
+		if (it == end())
+			return;
+		node_ptr cur = it.node;
+		if (!cur->child.empty())
+		{
+			delete_value(cur->value);
+			cur->value = NULL;
+			return;
+		}
+		do {
+			node_ptr parent = cur->parent;
+			parent->child.erase(cur->child_iter_of_parent);
+			delete_node(cur);
+			cur = parent;
+		} while (cur != root && cur->child.empty() && cur->value == NULL);
+	}
+
+	void erase(const_iterator it)
+	{
+		erase(it);
+	}
+
+	template<typename Iter>
+	void erase(Iter first, Iter last)
+	{
+		iterator it = find(first, last);
+		if (it != end())
+			erase(it);
+	}
+
+	template<typename Container>
+	void erase(const Container &container)
+	{
+		erase(container.begin(), container.end());
+	}
+
 	void clear(node_ptr cur)
 	{
-		typename node_type::child_iter ci = cur->child.begin();
-		// end() may take time to calc
-		typename node_type::child_iter ci_end = cur->child.end();
-		for (; ci != ci_end; ++ci)
+		// use vector to simulate stack, avoiding the possibility of stack overflow
+		// it is said that the using local type in template will be allowed in C++0x
+		/*
+		class stack_element {
+			node_ptr node;
+			typename node_type::child_iter ci;
+			typename node_type::child_iter ci_end;
+		};
+		*/
+		std::stack<node_ptr> node_stk;
+		std::stack<typename node_type::child_iter> ci_stk;
+		node_stk.push(cur);
+		ci_stk.push(cur->child.begin());
+		for (; !node_stk.empty(); )
 		{
-			node_ptr c = ci->second;
-			clear(c);
-			delete_node(c);
+			cur = node_stk.top();
+			if (ci_stk.top() == cur->child.end())
+			{
+				if (cur != root)
+				{
+					delete_node(cur);
+				} else {
+					cur->child.clear();
+				}
+				node_stk.pop();
+				ci_stk.pop();
+			} else {
+				node_ptr c = ci_stk.top()->second;
+				++ci_stk.top();
+				node_stk.push(c);
+				ci_stk.push(c->child.begin());
+			}
 		}
+	}
+
+	void clear()
+	{
+		clear(root);
 	}
 
 	size_t size() const
@@ -565,6 +636,34 @@ public:
 	bool empty()
 	{
 		return t.empty();
+	}
+
+	// shoule change the type of return value to iterator
+	void erase(iterator it)
+	{
+		t.erase(it);
+	}
+
+	void erase(const_iterator it)
+	{
+		t.erase(it);
+	}
+
+	template<typename Container>
+	void erase(const Container &container)
+	{
+		t.erase(container);
+	}
+
+	template<typename Iter>
+	void erase(Iter first, Iter last)
+	{
+		t.erase(first, last);
+	}
+
+	void clear()
+	{
+		t.clear();
 	}
 
 	~trie_map()
