@@ -54,6 +54,11 @@ struct trie_node {
 		child.clear();
 	}
 
+	explicit trie_node(const value_type& x) : value(x), parent(0)
+	{
+
+	}
+
 	void assign(const trie_node& x)
 	{
 		child = x.child;
@@ -89,9 +94,9 @@ struct trie_iterator
 	typedef Reference ref;
 	typedef Pointer ptr;
 	typedef trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
+	typedef iterator self;
 	typedef trie_iterator<Key, Value, const Value&, const Value*, Compare> const_iterator;
 	typedef trie_node<Key, Value, Compare> node_type;
-	typedef iterator self;
 	typedef node_type* node_ptr;
 
 	node_ptr node;
@@ -118,12 +123,12 @@ struct trie_iterator
 		return &(operator*()); 
 	}
 
-	bool operator==(const trie_iterator& other)
+	bool operator==(const trie_iterator& other) const
 	{
 		return node == other.node;
 	}
 
-	bool operator!=(const trie_iterator& other)
+	bool operator!=(const trie_iterator& other) const
 	{
 		return node != other.node;
 	}
@@ -240,11 +245,11 @@ template <typename Key, typename Value,
 class trie {
 public:
 	typedef Key key_type;
+	typedef key_type * key_ptr;
 	typedef Value value_type;
 	typedef value_type* value_ptr;
 	typedef trie<key_type, value_type, Compare> trie_type;
 	typedef typename detail::trie_node<key_type, value_type, Compare> node_type;
-	typedef key_type * key_ptr;
 	typedef node_type * node_ptr;
 	typedef std::allocator< node_type > trie_node_allocator;
 	typedef std::allocator< value_type > value_allocator;
@@ -257,9 +262,11 @@ public:
 	size_type node_count;
 	size_type value_count;
 
-	value_ptr new_value()
+	value_ptr new_value(const value_type& x)
 	{
-		return value_alloc.allocate(1);
+		value_ptr v = value_alloc.allocate(1);
+		value_alloc.construct(v, x);
+		return v;
 	}
 
 	void delete_value(value_ptr p)
@@ -287,7 +294,8 @@ public:
 	node_ptr create_node(const value_type& value) 
 	{
 		node_ptr tmp = get_node();
-		value_alloc.construct(tmp, value);
+		new(tmp) node_type();
+		tmp->value = new_value(value);
 		return tmp;
 	}
 
@@ -303,24 +311,21 @@ public:
 	}
 
 	// need constant time to get leftmost
-	node_ptr leftmost() const
+	node_ptr leftmost(node_ptr node)
 	{
-		if (empty())
-			return root;
-		node_ptr cur = root;
-		while (cur->value == NULL)
+		node_ptr cur = node;
+		while (!cur->child.empty() && cur->value == NULL)
 		{
 			cur = cur->child.begin()->second;
 		}
 		return cur;
 	}
 
-	node_ptr& rightmost() const
+	// need constant time to get rightmost
+	node_ptr rightmost(node_ptr node)
 	{
-		if (empty())
-			return root;
-		node_ptr cur = root;
-		while (cur->value == NULL)
+		node_ptr cur = node;
+		while (!cur->child.empty())
 		{
 			cur = cur->child.rbegin()->second;
 		}
@@ -330,39 +335,93 @@ public:
 public:
 	// iterators still unavailable here
 	
-	explicit trie() : root(create_node()), node_count(0), value_count(0) 
+	explicit trie() : trie_node_alloc(), value_alloc(), root(create_node()), node_count(0), value_count(0) 
 	{
 	}
 
-	explicit trie(const trie_type& t) : value_count(t.value_count), node_count(t.node_count)
+	explicit trie(const trie_type& t) : trie_node_alloc(), value_alloc(), root(create_node()), node_count(0), value_count(0) 
 	{
+		copy_tree(t.root);
+	}
+
+	trie_type& operator=(const trie_type& t)
+	{
+		copy_tree(t.root);
+		return *this;
+	}
+
+	void copy_tree(node_ptr other_root)
+	{
+		if (other_root == root)
+			return;
+
+		clear();
+
+		std::stack<node_ptr> other_node_stk, self_node_stk;
+		std::stack<typename node_type::child_iter> ci_stk;
+		other_node_stk.push(other_root);
+		self_node_stk.push(root);
+		ci_stk.push(other_root->child.begin());
+		for (; !other_node_stk.empty(); )
+		{
+			node_ptr other_cur = other_node_stk.top();
+			node_ptr self_cur = self_node_stk.top();
+			if (ci_stk.top() == other_cur->child.end())
+			{
+				other_node_stk.pop();
+				ci_stk.pop();
+				self_node_stk.pop();
+			} else {
+				node_ptr c = ci_stk.top()->second;
+				// create new node
+				node_ptr new_node;
+				++node_count;
+				if (c->value)
+				{
+					++value_count;
+					new_node = create_node(*c->value);
+				}
+				else {
+					new_node = create_node();
+				}
+				new_node->parent = self_cur;
+				new_node->key_elem = ci_stk.top()->first;
+				new_node->child_iter_of_parent = self_cur->child.insert(std::make_pair(new_node->key_elem, new_node)).first;
+				// to next node
+				++ci_stk.top();
+				other_node_stk.push(c);
+				ci_stk.push(c->child.begin());
+				self_node_stk.push(new_node);
+			}
+		}
 	}
 
 	typedef detail::trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
 	typedef typename iterator::const_iterator const_iterator;
 	typedef std::pair<iterator, bool> pair_iterator_bool;
+	typedef std::pair<iterator, iterator> iterator_range;
 
-	iterator begin() const
+	iterator begin() 
 	{
-		return leftmost();
+		return leftmost(root);
 	}
 
-	const_iterator cbegin() const
+	const_iterator cbegin() 
 	{
-		return leftmost();
+		return leftmost(root);
 	}
 
-	iterator end() const
+	iterator end() 
 	{
 		return root;
 	}
 
-	iterator rbegin() const
+	iterator rbegin() 
 	{
-		return rightmost();
+		return rightmost(root);
 	}
 
-	iterator rend() const
+	iterator rend() 
 	{
 		return root;
 	}
@@ -382,8 +441,7 @@ public:
 			new_node->child_iter_of_parent = ci;
 			cur = ci->second;
 		}
-		cur->value = new_value();
-		value_alloc.construct(cur->value, value);
+		cur->value = new_value(value);
 		++value_count;
 		return cur;
 	}
@@ -420,7 +478,7 @@ public:
 
 // find 
 	template<typename Iter>
-	iterator find(Iter first, Iter last)
+	node_ptr find_node(Iter first, Iter last)
 	{
 		node_ptr cur = root;
 		for (; first != last; ++first)
@@ -429,20 +487,43 @@ public:
 			typename node_type::child_iter ci = cur->child.find(cur_key);
 			if (ci == cur->child.end())
 			{
-				return end();
+				return NULL;
 			}
 			cur = ci->second;
 		}
-		// different from find_range
-		if (cur->value == NULL)
-			return end();
 		return cur;
+	}
+
+	template<typename Iter>
+	iterator find(Iter first, Iter last)
+	{
+		node_ptr node = find_node(first, last);
+		if (node == NULL || node->value == NULL)
+			return end();
+		return node;
 	}
 
 	template<typename Container>
 	iterator find(const Container &container)
 	{
 		return find(container.begin(), container.end());
+	}
+	
+// find by prefix, return a pair of iterator(begin, end)
+	template<typename Iter>
+	iterator_range find_prefix(Iter first, Iter last)
+	{
+		node_ptr node = find_node(first, last);
+		iterator begin = leftmost(node);
+		iterator end = rightmost(node);
+		++end;
+		return make_pair(begin, end);
+	}
+
+	template<typename Container>
+	iterator_range find_prefix(const Container &container)
+	{
+		return find_prefix(container.begin(), container.end());
 	}
 
 	void erase(iterator it)
@@ -555,6 +636,7 @@ public:
 	typedef Key key_type;
 	typedef Value value_type;
 	typedef trie<key_type, value_type, Compare> trie_type;
+	typedef trie_map<Key, Value, Compare> trie_map_type;
 	typedef typename trie_type::iterator iterator;
 	typedef typename trie_type::const_iterator const_iterator;
 	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
@@ -564,31 +646,41 @@ protected:
 	trie_type t;
 
 public:
-	explicit trie_map() 
+	explicit trie_map() : t()
 	{
 	}
 
-	iterator begin() const 
+	explicit trie_map(const trie_map_type& other) : t(other.t)
+	{
+	}
+
+	trie_map_type& operator=(const trie_map_type& other)
+	{
+		t = other.t;
+		return *this;
+	}
+
+	iterator begin() 
 	{
 		return t.begin();
 	}
 
-	const_iterator cbegin() const 
+	const_iterator cbegin() 
 	{
 		return t.cbegin();
 	}
 
-	iterator end() const
+	iterator end() 
 	{
 		return t.end();
 	}
 
-	iterator rbegin() const 
+	iterator rbegin() 
 	{
 		return t.rbegin();
 	}
 
-	iterator rend() const
+	iterator rend() 
 	{
 		return t.rend();
 	}

@@ -41,6 +41,31 @@ BOOST_AUTO_TEST_CASE(insert_and_find_test)
 	BOOST_CHECK((t.insert(s, 10)).second == false);
 }
 
+BOOST_AUTO_TEST_CASE(copy_test)
+{
+	boost::tries::trie_map<char, int> t, t2;
+	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
+	t[s] = 1; t[s1] = 2; t[s2] = 3; t[s3] = 4;
+	t2 = t;
+	BOOST_CHECK(t2.size() == 4);
+	BOOST_CHECK(t2.node_count() == 8);
+	BOOST_CHECK(t2[s] == 1);
+	BOOST_CHECK(t2[s1] == 2);
+	BOOST_CHECK(t2[s2] == 3);
+	BOOST_CHECK(t2[s3] == 4);
+	boost::tries::trie_map<char, int> t3(t2);
+	BOOST_CHECK(t3.size() == 4);
+	BOOST_CHECK(t3.node_count() == 8);
+	BOOST_CHECK(*t3.find(s) == 1);
+	BOOST_CHECK(*t3.find(s1) == 2);
+	BOOST_CHECK(*t3.find(s2) == 3);
+	BOOST_CHECK(*t3.find(s3) == 4);
+	t3[std::string("a")] = 10;
+	BOOST_CHECK(t3.size() == 5);
+	BOOST_CHECK(t3.node_count() == 8);
+	BOOST_CHECK(*t3.begin() == 10);
+}
+
 BOOST_AUTO_TEST_CASE(iterator_operator_plus)
 {
 	boost::tries::trie_map<char, int> t;
