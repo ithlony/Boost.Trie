@@ -16,3 +16,4 @@ project
 	;
 
 run test.cpp ;
+run test_custom_type.cpp ;

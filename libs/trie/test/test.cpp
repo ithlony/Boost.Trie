@@ -7,6 +7,8 @@
 
 BOOST_AUTO_TEST_SUITE(trie_test)
 
+typedef boost::tries::trie_map<char, int> tci;
+
 BOOST_AUTO_TEST_CASE(operator_test)
 {
 	boost::tries::trie_map<char, int> t;
@@ -212,5 +214,87 @@ BOOST_AUTO_TEST_CASE(erase_key)
 	BOOST_CHECK(t.size() == 3);
 	BOOST_CHECK(*ti == 0);
 	BOOST_CHECK(t.node_count() == 7);
+}
+
+BOOST_AUTO_TEST_CASE(find_prefix)
+{
+	tci t;
+	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
+	t[s] = 1;
+	t[s1] = 2;
+	t[s2] = 3;
+	t[s3] = 4;
+	tci::iterator_range r = t.find_prefix(std::string("a"));
+	// the statement is tested when I know r.second != t.end()
+	std::cout << *r.first << " " << *r.second << std::endl;
+	BOOST_CHECK(*r.second == 4);
+	int j = 1;
+	for (tci::iterator i = r.first; i != r.second; ++i)
+	{
+		std::cout << *i << std::endl;
+		BOOST_CHECK(*i == j);
+		++j;
+	}
+	r = t.find_prefix(std::string("aa"));
+	std::cout << *r.first << " " << *r.second << std::endl;
+	BOOST_CHECK(*r.second == 4);
+	j = 1;
+	for (tci::iterator i = r.first; i != r.second; ++i)
+	{
+		std::cout << *i << std::endl;
+		BOOST_CHECK(*i == j);
+		++j;
+	}
+	r = t.find_prefix(std::string("aaa"));
+	std::cout << *r.first << " " << *r.second << std::endl;
+	BOOST_CHECK(*r.second == 3);
+	j = 1;
+	for (tci::iterator i = r.first; i != r.second; ++i)
+	{
+		std::cout << *i << std::endl;
+		BOOST_CHECK(*i == j);
+		++j;
+	}
+	r = t.find_prefix(std::string("b"));
+	//std::cout << *r.first << " " << *r.second << std::endl;
+	BOOST_CHECK(r.second == t.end());
+	for (tci::iterator i = r.first; i != r.second; ++i)
+	{
+		std::cout << *i << std::endl;
+		BOOST_CHECK(*i == 4);
+	}
+	r = t.find_prefix(std::string("bbbbb"));
+	//std::cout << *r.first << " " << *r.second << std::endl;
+	BOOST_CHECK(r.second == t.end());
+	for (tci::iterator i = r.first; i != r.second; ++i)
+	{
+		std::cout << *i << std::endl;
+		BOOST_CHECK(*i == 1);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(get_key_test)
+{
+	tci t;
+	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
+	t[s] = 1;
+	t[s1] = 2;
+	t[s2] = 3;
+	t[s3] = 4;
+	tci t2;
+	tci::iterator i = t.begin();
+	t2[i.get_key()] = 1;
+	++i;
+	t2[i.get_key()] = 2;
+	++i;
+	t2[i.get_key()] = 3;
+	++i;
+	t2[i.get_key()] = 4;
+	tci::iterator j = t2.begin();
+	for (i = t.begin(); i != t.end(); ++i, ++j)
+	{
+		BOOST_CHECK(*i == *j);
+		BOOST_CHECK(i.get_key() == j.get_key());
+	}
 }
 BOOST_AUTO_TEST_SUITE_END()

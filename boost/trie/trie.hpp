@@ -13,6 +13,7 @@
 #include <memory>
 #include <iostream>
 #include <stack>
+#include <boost/utility.hpp>
 
 namespace boost { namespace tries {
 
@@ -22,7 +23,7 @@ template <typename Key, typename Value,
 		 class Compare/*,
 		 // only one value, so alloc maybe unnecessary
 		 class Alloc = alloc*/>
-struct trie_node {
+struct trie_node : private boost::noncopyable {
 //protected:
 	typedef Key key_type;
 	typedef key_type* key_ptr;
@@ -54,6 +55,7 @@ struct trie_node {
 		child.clear();
 	}
 
+	/*
 	explicit trie_node(const value_type& x) : value(x), parent(0)
 	{
 
@@ -77,6 +79,7 @@ struct trie_node {
 	{
 		assign(x);
 	}
+	*/
 
 	~trie_node()
 	{
@@ -113,12 +116,37 @@ struct trie_iterator
 	{
 	}
 
-	ref operator*() const 
+	/*
+	 *
+	 * a function returns the key on the path should be invented
+	 *
+	 */
+	std::vector<key_type> get_key()
+	{
+		std::vector<key_type> key_path;
+		node_ptr cur = node;
+		while (cur->parent != NULL)
+		{
+			key_path.push_back(cur->key_elem);
+			cur = cur->parent;
+		}
+		return std::vector<key_type>(key_path.rbegin(), key_path.rend());
+	}
+
+	/*
+	template<typename Container>
+	Container<key_type> get_key(Container<key_type>& container)
+	{
+		
+	}
+	*/
+
+	ref operator*() 
 	{
 		return *node->value;
 	}
 
-	ptr operator->() const
+	ptr operator->() 
 	{
 		return &(operator*()); 
 	}
@@ -514,6 +542,10 @@ public:
 	iterator_range find_prefix(Iter first, Iter last)
 	{
 		node_ptr node = find_node(first, last);
+		if (node == NULL)
+		{
+			return make_pair(end(), end());
+		}
 		iterator begin = leftmost(node);
 		iterator end = rightmost(node);
 		++end;
@@ -526,16 +558,18 @@ public:
 		return find_prefix(container.begin(), container.end());
 	}
 
-	void erase(iterator it)
+	iterator erase(iterator it)
 	{
 		if (it == end())
-			return;
+			return it;
+		iterator ret = it;
+		++ret;
 		node_ptr cur = it.node;
 		if (!cur->child.empty())
 		{
 			delete_value(cur->value);
 			cur->value = NULL;
-			return;
+			return ret;
 		}
 		do {
 			node_ptr parent = cur->parent;
@@ -543,25 +577,26 @@ public:
 			delete_node(cur);
 			cur = parent;
 		} while (cur != root && cur->child.empty() && cur->value == NULL);
+		return ret;
 	}
 
-	void erase(const_iterator it)
+	iterator erase(const_iterator it)
 	{
-		erase(it);
+		return erase(it);
 	}
 
 	template<typename Iter>
-	void erase(Iter first, Iter last)
+	iterator erase(Iter first, Iter last)
 	{
 		iterator it = find(first, last);
-		if (it != end())
-			erase(it);
+		return erase(it);
+
 	}
 
 	template<typename Container>
-	void erase(const Container &container)
+	iterator erase(const Container &container)
 	{
-		erase(container.begin(), container.end());
+		return erase(container.begin(), container.end());
 	}
 
 	void clear(node_ptr cur)
@@ -640,6 +675,7 @@ public:
 	typedef typename trie_type::iterator iterator;
 	typedef typename trie_type::const_iterator const_iterator;
 	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
+	typedef typename trie_type::iterator_range iterator_range;
 	typedef size_t size_type;
 
 protected:
@@ -708,11 +744,22 @@ public:
 	{
 		return t.find(first, last);
 	}
-
 	template<typename Container>
 	iterator find(const Container& container)
 	{
 		return t.find(container);
+	}
+
+	template<typename Iter>
+	iterator_range find_prefix(Iter first, Iter last)
+	{
+		return t.find_prefix(first, last);
+	}
+
+	template<typename Container>
+	iterator_range find_prefix(const Container& container)
+	{
+		return t.find_prefix(container);
 	}
 
 	size_type node_count()
@@ -731,26 +778,26 @@ public:
 	}
 
 	// shoule change the type of return value to iterator
-	void erase(iterator it)
+	iterator erase(iterator it)
 	{
-		t.erase(it);
+		return t.erase(it);
 	}
 
-	void erase(const_iterator it)
+	iterator erase(const_iterator it)
 	{
-		t.erase(it);
+		return t.erase(it);
 	}
 
 	template<typename Container>
-	void erase(const Container &container)
+	iterator erase(const Container &container)
 	{
-		t.erase(container);
+		return t.erase(container);
 	}
 
 	template<typename Iter>
-	void erase(Iter first, Iter last)
+	iterator erase(Iter first, Iter last)
 	{
-		t.erase(first, last);
+		return t.erase(first, last);
 	}
 
 	void clear()
@@ -765,6 +812,143 @@ public:
 
 };
 
+template<typename Key, class Compare = std::less<Key> >
+class trie_set
+{
+public:
+	typedef Key key_type;
+	typedef bool value_type;
+	typedef trie<key_type, value_type, Compare> trie_type;
+	typedef trie_set<Key, Compare> trie_set_type;
+	typedef typename trie_type::const_iterator iterator;
+	typedef typename trie_type::const_iterator const_iterator;
+	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
+	typedef typename trie_type::iterator_range iterator_range;
+	typedef size_t size_type;
+
+protected:
+	trie_type t;
+
+public:
+	explicit trie_set() : t()
+	{
+	}
+
+	explicit trie_set(const trie_set_type& other) : t(other.t)
+	{
+	}
+
+	trie_set_type& operator=(const trie_set_type& other)
+	{
+		t = other.t;
+		return *this;
+	}
+
+	iterator begin() 
+	{
+		return t.begin();
+	}
+
+	const_iterator cbegin() 
+	{
+		return t.cbegin();
+	}
+
+	iterator end() 
+	{
+		return t.end();
+	}
+
+	iterator rbegin() 
+	{
+		return t.rbegin();
+	}
+
+	iterator rend() 
+	{
+		return t.rend();
+	}
+
+	template<typename Iter>
+	pair_iterator_bool insert(Iter first, Iter last)
+	{
+		return t.insert_unique(first, last, value_type());
+	}
+
+	template<typename Container>
+	pair_iterator_bool insert(const Container& container)
+	{
+		return t.insert_unique(container, value_type());
+	}
+
+	template<typename Iter>
+	iterator find(Iter first, Iter last)
+	{
+		return t.find(first, last);
+	}
+
+	template<typename Container>
+	iterator find(const Container& container)
+	{
+		return t.find(container);
+	}
+
+	template<typename Iter>
+	iterator_range find_prefix(Iter first, Iter last)
+	{
+		return t.find_prefix(first, last);
+	}
+
+	template<typename Container>
+	iterator_range find_prefix(const Container& container)
+	{
+		return t.find_prefix(container);
+	}
+
+	size_type node_count()
+	{
+		return t.node_count;
+	}
+
+	size_type size()
+	{
+		return t.size();
+	}
+
+	bool empty()
+	{
+		return t.empty();
+	}
+
+	// shoule change the type of return value to iterator
+	iterator erase(iterator it)
+	{
+		return t.erase(it);
+	}
+
+	template<typename Container>
+	iterator erase(const Container &container)
+	{
+		return t.erase(container);
+	}
+
+	template<typename Iter>
+	iterator erase(Iter first, Iter last)
+	{
+		return t.erase(first, last);
+	}
+
+	void clear()
+	{
+		t.clear();
+	}
+
+	~trie_set()
+	{
+		t.destroy();
+	}
+
+};
 } // tries
 } // boost
 #endif // BOOST_TRIE_HPP
