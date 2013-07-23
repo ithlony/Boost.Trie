@@ -41,7 +41,6 @@ struct trie_node : private boost::noncopyable {
 //public:
 	value_ptr value; // use unique_ptr here?
 	node_ptr parent;
-	key_type key_elem;
 	// store the iterator to optimize operator++ and operator--
 	// utilize that the iterator in map does not change after insertion
 	child_iter child_iter_of_parent;
@@ -52,38 +51,24 @@ struct trie_node : private boost::noncopyable {
 
 	explicit trie_node() : value(0), parent(0) 
 	{
-		child.clear();
 	}
 
-	/*
-	explicit trie_node(const value_type& x) : value(x), parent(0)
+	const key_type& key_elem() const
 	{
-
+		// that seems unsafe
+		return child_iter_of_parent->first;
 	}
-
-	void assign(const trie_node& x)
-	{
-		child = x.child;
-		value = x.value;
-		parent = x.parent;
-		key_elem = x.key_elem;
-		child_iter_of_parent = x.child_iter_of_parent;
-	}
-
-	explicit trie_node(const trie_node& x)
-	{
-		assign(x);
-	}
-
-	trie_node& operator=(const trie_node& x)
-	{
-		assign(x);
-	}
-	*/
 
 	~trie_node()
 	{
-		child.clear();
+	}
+private:
+	explicit trie_node(const trie_node&)
+	{
+	}
+
+	trie_node& operator=(const trie_node&)
+	{
 	}
 
 };
@@ -97,6 +82,7 @@ struct trie_iterator
 	typedef Reference ref;
 	typedef Pointer ptr;
 	typedef trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
+	typedef trie_iterator<Key, Value, Reference, Pointer, Compare> iter_type;
 	typedef iterator self;
 	typedef trie_iterator<Key, Value, const Value&, const Value*, Compare> const_iterator;
 	typedef trie_node<Key, Value, Compare> node_type;
@@ -104,15 +90,16 @@ struct trie_iterator
 
 	node_ptr node;
 
-	trie_iterator() : node(0)
+public:
+	explicit trie_iterator() : node(0)
 	{
 	}
 
-	trie_iterator(node_ptr x) : node(x)
+	trie_iterator(node_ptr x) : node(x) 
 	{
 	}
 
-	trie_iterator(const iterator &it): node(it.node)
+	trie_iterator(const iterator &it) : node(it.node)
 	{
 	}
 
@@ -127,7 +114,7 @@ struct trie_iterator
 		node_ptr cur = node;
 		while (cur->parent != NULL)
 		{
-			key_path.push_back(cur->key_elem);
+			key_path.push_back(cur->key_elem());
 			cur = cur->parent;
 		}
 		return std::vector<key_type>(key_path.rbegin(), key_path.rend());
@@ -141,12 +128,12 @@ struct trie_iterator
 	}
 	*/
 
-	ref operator*() 
+	ref operator*() const 
 	{
 		return *node->value;
 	}
 
-	ptr operator->() 
+	ptr operator->() const
 	{
 		return &(operator*()); 
 	}
@@ -283,6 +270,7 @@ public:
 	typedef std::allocator< value_type > value_allocator;
 	typedef size_t size_type;
 
+private:
 	trie_node_allocator trie_node_alloc;
 	value_allocator value_alloc;
 
@@ -339,7 +327,7 @@ public:
 	}
 
 	// need constant time to get leftmost
-	node_ptr leftmost(node_ptr node)
+	node_ptr leftmost(node_ptr node) const
 	{
 		node_ptr cur = node;
 		while (!cur->child.empty() && cur->value == NULL)
@@ -350,7 +338,7 @@ public:
 	}
 
 	// need constant time to get rightmost
-	node_ptr rightmost(node_ptr node)
+	node_ptr rightmost(node_ptr node) const
 	{
 		node_ptr cur = node;
 		while (!cur->child.empty())
@@ -358,24 +346,6 @@ public:
 			cur = cur->child.rbegin()->second;
 		}
 		return cur;
-	}
-
-public:
-	// iterators still unavailable here
-	
-	explicit trie() : trie_node_alloc(), value_alloc(), root(create_node()), node_count(0), value_count(0) 
-	{
-	}
-
-	explicit trie(const trie_type& t) : trie_node_alloc(), value_alloc(), root(create_node()), node_count(0), value_count(0) 
-	{
-		copy_tree(t.root);
-	}
-
-	trie_type& operator=(const trie_type& t)
-	{
-		copy_tree(t.root);
-		return *this;
 	}
 
 	void copy_tree(node_ptr other_root)
@@ -413,8 +383,7 @@ public:
 					new_node = create_node();
 				}
 				new_node->parent = self_cur;
-				new_node->key_elem = ci_stk.top()->first;
-				new_node->child_iter_of_parent = self_cur->child.insert(std::make_pair(new_node->key_elem, new_node)).first;
+				new_node->child_iter_of_parent = self_cur->child.insert(std::make_pair(ci_stk.top()->first, new_node)).first;
 				// to next node
 				++ci_stk.top();
 				other_node_stk.push(c);
@@ -424,12 +393,36 @@ public:
 		}
 	}
 
+public:
+	// iterators still unavailable here
+	
+	explicit trie() : trie_node_alloc(), value_alloc(), root(create_node()), node_count(0), value_count(0) 
+	{
+	}
+
+	explicit trie(const trie_type& t) : trie_node_alloc(), value_alloc(), root(create_node()), node_count(0), value_count(0) 
+	{
+		copy_tree(t.root);
+	}
+
+	trie_type& operator=(const trie_type& t)
+	{
+		copy_tree(t.root);
+		return *this;
+	}
+
+
 	typedef detail::trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
 	typedef typename iterator::const_iterator const_iterator;
 	typedef std::pair<iterator, bool> pair_iterator_bool;
 	typedef std::pair<iterator, iterator> iterator_range;
 
 	iterator begin() 
+	{
+		return leftmost(root);
+	}
+
+	iterator begin() const
 	{
 		return leftmost(root);
 	}
@@ -464,7 +457,6 @@ public:
 			node_ptr new_node = create_node();
 			++node_count;
 			new_node->parent = cur;
-			new_node->key_elem = cur_key;
 			typename node_type::child_iter ci = cur->child.insert(std::make_pair(cur_key, new_node)).first;
 			new_node->child_iter_of_parent = ci;
 			cur = ci->second;
@@ -504,7 +496,6 @@ public:
 		return insert_unique(container.begin(), container.end(), value);
 	}
 
-// find 
 	template<typename Iter>
 	node_ptr find_node(Iter first, Iter last)
 	{
@@ -641,7 +632,12 @@ public:
 		clear(root);
 	}
 
-	size_t size() const
+	size_type count_node() const
+	{
+		return node_count;
+	}
+
+	size_type size() const
 	{
 		return value_count;
 	}
@@ -762,12 +758,12 @@ public:
 		return t.find_prefix(container);
 	}
 
-	size_type node_count()
+	size_type count_node() const
 	{
-		return t.node_count;
+		return t.count_node();
 	}
 
-	size_type size()
+	size_type size() const
 	{
 		return t.size();
 	}
@@ -905,12 +901,12 @@ public:
 		return t.find_prefix(container);
 	}
 
-	size_type node_count()
+	size_type count_node() const
 	{
-		return t.node_count;
+		return t.count_node();
 	}
 
-	size_type size()
+	size_type size() const
 	{
 		return t.size();
 	}

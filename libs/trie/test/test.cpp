@@ -50,21 +50,21 @@ BOOST_AUTO_TEST_CASE(copy_test)
 	t[s] = 1; t[s1] = 2; t[s2] = 3; t[s3] = 4;
 	t2 = t;
 	BOOST_CHECK(t2.size() == 4);
-	BOOST_CHECK(t2.node_count() == 8);
+	BOOST_CHECK(t2.count_node() == 8);
 	BOOST_CHECK(t2[s] == 1);
 	BOOST_CHECK(t2[s1] == 2);
 	BOOST_CHECK(t2[s2] == 3);
 	BOOST_CHECK(t2[s3] == 4);
 	boost::tries::trie_map<char, int> t3(t2);
 	BOOST_CHECK(t3.size() == 4);
-	BOOST_CHECK(t3.node_count() == 8);
+	BOOST_CHECK(t3.count_node() == 8);
 	BOOST_CHECK(*t3.find(s) == 1);
 	BOOST_CHECK(*t3.find(s1) == 2);
 	BOOST_CHECK(*t3.find(s2) == 3);
 	BOOST_CHECK(*t3.find(s3) == 4);
 	t3[std::string("a")] = 10;
 	BOOST_CHECK(t3.size() == 5);
-	BOOST_CHECK(t3.node_count() == 8);
+	BOOST_CHECK(t3.count_node() == 8);
 	BOOST_CHECK(*t3.begin() == 10);
 }
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(iterator_operator_minus)
 	BOOST_CHECK(ti == t.end());
 	--ti;
 	BOOST_CHECK(*ti == 4);
-	BOOST_CHECK(t.node_count() == 8);
+	BOOST_CHECK(t.count_node() == 8);
 	BOOST_CHECK(t.size() == 4);
 }
 
@@ -136,15 +136,15 @@ BOOST_AUTO_TEST_CASE(clear)
 	boost::tries::trie_map<char, int> t;
 	std::string s = "aaa", s1 = "aaaa", s2 = "aab", s3 = "bbb";
 	t[s] = t[s1] = t[s2] = t[s3] = 10;
-	int node_cnt = t.node_count();
+	int node_cnt = t.count_node();
 	BOOST_CHECK(t.size() == 4);
-	BOOST_CHECK(t.node_count() == node_cnt);
+	BOOST_CHECK(t.count_node() == node_cnt);
 	t.clear();
 	BOOST_CHECK(t.size() == 0);
-	BOOST_CHECK(t.node_count() == 0);
+	BOOST_CHECK(t.count_node() == 0);
 	BOOST_CHECK(t[s] == 0);
 	BOOST_CHECK(t.size() == 1);
-	BOOST_CHECK(t.node_count() == 3);
+	BOOST_CHECK(t.count_node() == 3);
 }
 
 BOOST_AUTO_TEST_CASE(erase_iterator)
@@ -155,28 +155,28 @@ BOOST_AUTO_TEST_CASE(erase_iterator)
 	t[s1] = 2;
 	t[s2] = 3;
 	t[s3] = 4;
-	int node_cnt = t.node_count();
+	int node_cnt = t.count_node();
 	BOOST_CHECK(t.size() == 4);
-	std::cout << t.size() << ' ' << t.node_count() << std::endl;
-	BOOST_CHECK(t.node_count() == node_cnt);
+	std::cout << t.size() << ' ' << t.count_node() << std::endl;
+	BOOST_CHECK(t.count_node() == node_cnt);
 	std::cout << *t.begin() << std::endl;
 	boost::tries::trie_map<char, int>::iterator ti;
 	ti = t.begin();
 	t.erase(t.begin());
 	ti = t.begin();
 	BOOST_CHECK(t.size() == 3);
-	BOOST_CHECK(t.node_count() == 8);
+	BOOST_CHECK(t.count_node() == 8);
 	BOOST_CHECK(*ti == 2);
 	t.erase(ti);
 	BOOST_CHECK(t.size() == 2);
 	ti = t.begin();
 	BOOST_CHECK(*ti == 3);
-	BOOST_CHECK(t.node_count() == 6);
+	BOOST_CHECK(t.count_node() == 6);
 	BOOST_CHECK(t[s] == 0);
 	ti = t.begin();
 	BOOST_CHECK(t.size() == 3);
 	BOOST_CHECK(*ti == 0);
-	BOOST_CHECK(t.node_count() == 7);
+	BOOST_CHECK(t.count_node() == 7);
 }
 
 BOOST_AUTO_TEST_CASE(erase_key)
@@ -187,33 +187,33 @@ BOOST_AUTO_TEST_CASE(erase_key)
 	t[s1] = 2;
 	t[s2] = 3;
 	t[s3] = 4;
-	int node_cnt = t.node_count();
+	int node_cnt = t.count_node();
 	BOOST_CHECK(t.size() == 4);
-	std::cout << t.size() << ' ' << t.node_count() << std::endl;
-	BOOST_CHECK(t.node_count() == node_cnt);
+	std::cout << t.size() << ' ' << t.count_node() << std::endl;
+	BOOST_CHECK(t.count_node() == node_cnt);
 	std::cout << *t.begin() << std::endl;
 	boost::tries::trie_map<char, int>::iterator ti;
 	ti = t.begin();
 	t.erase(s);
 	ti = t.begin();
 	BOOST_CHECK(t.size() == 3);
-	BOOST_CHECK(t.node_count() == 8);
+	BOOST_CHECK(t.count_node() == 8);
 	BOOST_CHECK(*ti == 2);
 	t.erase(s1);
 	BOOST_CHECK(t.size() == 2);
 	ti = t.begin();
 	BOOST_CHECK(*ti == 3);
-	BOOST_CHECK(t.node_count() == 6);
+	BOOST_CHECK(t.count_node() == 6);
 	BOOST_CHECK(t[s] == 0);
 	ti = t.begin();
 	BOOST_CHECK(t.size() == 3);
 	BOOST_CHECK(*ti == 0);
-	BOOST_CHECK(t.node_count() == 7);
+	BOOST_CHECK(t.count_node() == 7);
 	t.erase(std::string("bababa"));
 	ti = t.begin();
 	BOOST_CHECK(t.size() == 3);
 	BOOST_CHECK(*ti == 0);
-	BOOST_CHECK(t.node_count() == 7);
+	BOOST_CHECK(t.count_node() == 7);
 }
 
 BOOST_AUTO_TEST_CASE(find_prefix)
@@ -296,5 +296,7 @@ BOOST_AUTO_TEST_CASE(get_key_test)
 		BOOST_CHECK(*i == *j);
 		BOOST_CHECK(i.get_key() == j.get_key());
 	}
+	j = t2.erase(s2);
+	BOOST_CHECK(*j == 4);
 }
 BOOST_AUTO_TEST_SUITE_END()
