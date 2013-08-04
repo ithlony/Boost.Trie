@@ -11,6 +11,8 @@ notifications:
     on_failure: change # [always|never|change] # default: always
 
 before_install:
+ - cwd
+ - ls -a
  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  - if [ $CXX = "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
  - sudo apt-get update -qq
@@ -22,7 +24,7 @@ before_install:
  - tar zxf Boost_1_54_0.tar.gz
  - mv boost-trunk-release-Boost_1_54_0 $HOME/boost-trunk
  - BOOST="$HOME/boost-trunk"
- - PROJECTPATH="$HOME/ithlony/Boost.Trie"
+ - PROJECTPATH="$HOME/build/ithlony/Boost.Trie"
 
 #create symbolic links for trie
  - ln -s $PROJECTPATH/boost/trie/ $BOOST/boost/Boost.Trie
