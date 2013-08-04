@@ -1,0 +1,85 @@
+language: cpp
+compiler:
+  - gcc
+  - clang
+notifications:
+  email:
+#    recipients:
+#      - one@example.com
+#      - other@example.com
+    on_success: change # [always|never|change] # default: change
+    on_failure: change # [always|never|change] # default: always
+
+env:
+  matrix:
+    - _="Build test" VALGRIND=0 UNIT_TESTS=0 DEBUG=0 GCCVER="" GCOV=0
+    - _="Unit/functional tests" VALGRIND=0 UNIT_TESTS="" DEBUG=0 GCCVER="" GCOV=0
+    - _="GCC 4.8 + Unit/functional tests coverage" VALGRIND=0 CCFLAGS="-fprofile-arcs -ftest-coverage" UNIT_TESTS="" DEBUG=1 GCCVER="-4.8" GCOV=1
+    - _="Memory error and leak tests" VALGRIND=memcheck UNIT_TESTS="--log_level=test_suite --run_test=all/exclude_async_io_errors" DEBUG=2 GCCVER="" GCOV=0
+    - _="Race detection tests" VALGRIND=0 CCFLAGS="-fsanitize=thread" UNIT_TESTS="" DEBUG=2 GCCVER="-4.8" TSAN_OPTIONS="suppressions=libs/trie/test/tsan.supp" GCOV=0
+
+# The clang 3.2 .deb doesn't supply the needed tsan runtime library :(
+matrix:
+  exclude:
+    - compiler: clang
+      env: _="GCC 4.8 + Unit/functional tests coverage" VALGRIND=0 CCFLAGS="-fprofile-arcs -ftest-coverage" UNIT_TESTS="" DEBUG=1 GCCVER="-4.8" GCOV=1
+
+    - compiler: clang
+      env: _="Race detection tests" VALGRIND=0 CCFLAGS="-fsanitize=thread" UNIT_TESTS="" DEBUG=2 GCCVER="-4.8" TSAN_OPTIONS="suppressions=libs/trie/test/tsan.supp" GCOV=0
+
+
+  allow_failures:
+    - compiler: gcc
+      env: _="Race detection tests" VALGRIND=0 CCFLAGS="-fsanitize=thread" UNIT_TESTS="" DEBUG=2 GCCVER="-4.8" TSAN_OPTIONS="suppressions=libs/trie/test/tsan.supp" GCOV=0
+
+
+
+before_install:
+ - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+ - if [ $CXX = "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
+ - sudo apt-get update -qq
+ - if [ $CXX = "clang++" ]; then sudo apt-get install -qq libstdc++-4.8-dev clang-3.2; fi
+ - if [ $GCCVER != "" ]; then sudo apt-get install -qq g++$GCCVER; fi
+ - if [ $VALGRIND != "0" ]; then sudo apt-get install -qq valgrind; fi
+ - git submodule update --init --recursive
+ - wget https://github.com/ned14/boost-trunk/archive/release/Boost_1_54_0.tar.gz
+ - tar zxf Boost_1_54_0.tar.gz
+ - mv boost-trunk-release-Boost_1_54_0 $HOME/boost-trunk
+ - BOOST="$HOME/boost-trunk"
+ - PROJECTPATH="$HOME/build/BoostGSoC/Boost.Trie"
+
+#create symbolic links for trie
+ - ln -s $PROJECTPATH/boost/trie/ $BOOST/boost/Boost.Trie
+ - ln -s $PROJECTPATH/libs/trie/ $BOOST/libs/Boost.Trie
+
+#HOME should be defined per the travis-ci docs as /home/travis
+ - mv user-config.jam $HOME
+
+#auto generate the files to be included for test_all.cpp
+# - cd libs/trie/test
+# - chmod u+x test_file_glob.sh
+# - ./test_file_glob.sh
+
+# install boost build
+ - cd $BOOST/tools/build/v2
+ - ./bootstrap.sh
+ - sudo ./b2 install
+ - cd $PROJECTPATH
+
+script:
+
+#build boost.test
+ - cd $BOOST
+ - ./bootstrap.sh
+ - b2 stage toolset=$CC$GCCVER link=static release --threading=single
+
+#build testcases
+ - cd libs/trie/test
+ - b2
+
+#if we want to use the built in bjam test runner we can get test output this way
+# - cat bin.v2/libs/trie/test/main.test/*/*/main.output #may need to specify path better on valgrind tests
+
+
+
+
