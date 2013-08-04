@@ -22,7 +22,7 @@ before_install:
  - tar zxf Boost_1_54_0.tar.gz
  - mv boost-trunk-release-Boost_1_54_0 $HOME/boost-trunk
  - BOOST="$HOME/boost-trunk"
- - PROJECTPATH="$HOME/Boost.Trie"
+ - PROJECTPATH="$HOME/ithlony/Boost.Trie"
 
 #create symbolic links for trie
  - ln -s $PROJECTPATH/boost/trie/ $BOOST/boost/Boost.Trie
@@ -40,7 +40,6 @@ before_install:
  - cd $BOOST/tools/build/v2
  - ./bootstrap.sh
  - sudo ./b2 install
- - cd $PROJECTPATH
 
 script:
 
@@ -50,6 +49,7 @@ script:
  - b2 stage toolset=$CC$GCCVER link=static release --threading=single
 
 #build testcases
+ - cd $PROJECTPATH
  - cd libs/trie/test
  - b2
 
