@@ -46,7 +46,7 @@ script:
 #build boost.test
  - cd $BOOST
  - ./bootstrap.sh
- - b2 stage toolset=$CC$GCCVER link=static release --threading=single
+ - b2 stage --with-test toolset=$CC$GCCVER link=static release --threading=single
 
 #build testcases
  - cd $PROJECTPATH
