@@ -11,7 +11,6 @@ notifications:
     on_failure: change # [always|never|change] # default: always
 
 before_install:
- - cwd
  - ls -a
  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
  - if [ $CXX = "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
@@ -24,6 +23,7 @@ before_install:
  - tar zxf Boost_1_54_0.tar.gz
  - mv boost-trunk-release-Boost_1_54_0 $HOME/boost-trunk
  - BOOST="$HOME/boost-trunk"
+ - BOOST_ROOT="$HOME/boost-trunk"
  - PROJECTPATH="$HOME/build/ithlony/Boost.Trie"
 
 #create symbolic links for trie
@@ -31,7 +31,7 @@ before_install:
  - ln -s $PROJECTPATH/libs/trie/ $BOOST/libs/Boost.Trie
 
 #HOME should be defined per the travis-ci docs as /home/travis
- - mv user-config.jam $HOME
+#- mv user-config.jam $HOME
 
 #auto generate the files to be included for test_all.cpp
 # - cd libs/trie/test
@@ -53,6 +53,8 @@ script:
 #build testcases
  - cd $PROJECTPATH
  - cd libs/trie/test
+ - ls -a
+ - echo $BOOST_ROOT
  - b2
 
 #if we want to use the built in bjam test runner we can get test output this way
