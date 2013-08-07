@@ -10,9 +10,9 @@ using gcc ;
 
 project
     : requirements 
-	  <include>$(BOOST_ROOT)
+	  <include>$(boost_root)
 	  <include>../../../
-	  <library>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mgw46-mt-1_53.a
+	  <library>$(boost_root)/stage/lib/libboost_unit_test_framework-mgw46-mt-1_53.a
 	;
 
 run test.cpp ;

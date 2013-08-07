@@ -51,7 +51,6 @@ struct value_list_node : public list_node_base {
 
 	explicit value_list_node(const value_type& x) : value(x), node_in_trie(0)
 	{
-		std::cout<<x<<std::endl;
 	}
 
 private:
@@ -257,7 +256,6 @@ public:
 
 	ref operator*() const 
 	{
-		//std::cout << "aaa" << std::endl;
 		return vnode->value;
 	}
 
@@ -614,7 +612,6 @@ private:
 			new(v) value_node_type(x);
 			//value_alloc.construct(v, x);
 		}
-		std::cout<<"ddd"<<v->value<<std::endl;
 		return v;
 	}
 
@@ -693,7 +690,6 @@ private:
 			new(tmp) node_type();
 			while (vl_header != NULL)
 			{
-				std::cout <<"ds"<<std::endl;
 				value_node_ptr vn = new_value_node(vl_header->value); 
 				vn->next = tmp->value_list_header;
 				if (tmp->value_list_header != NULL)
@@ -764,8 +760,6 @@ private:
 			return;
 
 		clear();
-
-		std::cout << root->value_count << root->node_count << std::endl;
 
 		std::stack<node_ptr> other_node_stk, self_node_stk;
 		std::stack<typename node_type::child_iter> ci_stk;
@@ -888,10 +882,8 @@ public:
 	iterator __insert(node_ptr cur, Iter first, Iter last,
 			const value_type& value)
 	{
-		std::cout << "sd" << std::endl;
 		for (; first != last; ++first)
 		{
-			std::cout << "sd" << std::endl;
 			const key_type& cur_key = *first;
 			node_ptr new_node = create_trie_node();
 			new_node->parent = cur;
@@ -899,14 +891,10 @@ public:
 			new_node->child_iter_of_parent = ci;
 			cur = ci->second;
 		}
-		std::cout<<root->node_count<<std::endl;
-		//std::cout << "sd" << std::endl;
 		// insert the new value node into value_list
 		value_node_ptr value_node = new_value_node(value);
-		//std::cout << "sd" << std::endl;
 		value_node->node_in_trie = cur;
 		value_node->next = cur->value_list_header;
-		//std::cout << "sd" << std::endl;
 		if (cur->value_list_header != NULL)
 			cur->value_list_header->pred = value_node;
 		cur->value_list_header = value_node;
