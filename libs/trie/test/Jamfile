@@ -17,6 +17,7 @@ project
 	  <library>$(boost_root)/stage/lib/libboost_unit_test_framework-mgw46-mt-1_53.a
 	;
 
-run test.cpp ;
+run test_map.cpp ;
+run test_multiset.cpp ;
 run test_custom_type.cpp ;
 run antony_test.cpp ;

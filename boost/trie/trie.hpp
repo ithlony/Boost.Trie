@@ -106,6 +106,11 @@ struct trie_node {
 		return child_iter_of_parent->first;
 	}
 
+	size_type count() const
+	{
+		return self_value_count;
+	}
+
 	bool no_value() const
 	{
 		return self_value_count == 0;
@@ -156,6 +161,11 @@ struct trie_node<Key, void, Compare> {
 	{
 		// that seems unsafe?
 		return child_iter_of_parent->first;
+	}
+
+	size_type count() const
+	{
+		return self_value_count;
 	}
 
 	bool no_value() const
@@ -935,6 +945,30 @@ public:
 	}
 
 	template<typename Iter>
+	iterator insert_equal(Iter first, Iter last,
+			const value_type& value)
+	{
+		node_ptr cur = root;
+		for (; first != last; ++first)
+		{
+			const key_type& cur_key = *first;
+			typename node_type::child_iter ci = cur->child.find(cur_key);
+			if (ci == cur->child.end())
+			{
+				return __insert(cur, first, last, value);
+			}
+			cur = ci->second;
+		}
+		return __insert(cur, first, last, value);
+	}
+
+	template<typename Container>
+	iterator insert_equal(const Container &container, const value_type& value)
+	{
+		return insert_equal(container.begin(), container.end(), value);
+	}
+
+	template<typename Iter>
 	node_ptr find_node(Iter first, Iter last)
 	{
 		node_ptr cur = root;
@@ -951,6 +985,12 @@ public:
 		return cur;
 	}
 
+	template<typename Container>
+	node_ptr find_node(const Container &container)
+	{
+		return find_node(container.begin(), container.end());
+	}
+
 	template<typename Iter>
 	iterator find(Iter first, Iter last)
 	{
@@ -964,6 +1004,22 @@ public:
 	iterator find(const Container &container)
 	{
 		return find(container.begin(), container.end());
+	}
+
+// count
+	template<typename Iter>
+	size_type count(Iter first, Iter last)
+	{
+		node_ptr node = find_node(first, last);
+		if (node == NULL || node->no_value())
+			return 0;
+		return node->count();
+	}
+
+	template<typename Container>
+	size_type count(const Container &container)
+	{
+		return count(container.begin(), container.end());
 	}
 	
 // find by prefix, return a pair of iterator(begin, end)
@@ -992,6 +1048,21 @@ private:
 
 public:
 	//erase one node with value, and erase empty ancestors
+	void erase_node(node_ptr node)
+	{
+		if (node == NULL)
+			return;
+		node_ptr cur = node;
+		erase_value_list(cur);
+		do {
+			node_ptr parent = cur->parent;
+			parent->child.erase(cur->child_iter_of_parent);
+			delete_trie_node(cur);
+			cur = parent;
+		} while (cur != root && cur->child.empty() && cur->no_value());
+	}
+
+	// erase one value, after erasing value, check if it is necessary to erase node
 	iterator erase(iterator it)
 	{
 		if (it == end())
@@ -1002,11 +1073,9 @@ public:
 		node_ptr cur = it.tnode;
 		if (it.vnode->next == NULL && it.vnode->pred == NULL)
 		{
-			delete_value_node(vp);
-			cur->value_list_header = NULL;
+			erase_value_list(cur);
 			if (!cur->child.empty())
 			{
-				erase_value_list(cur);
 				return ret;
 			}
 			do {
@@ -1027,6 +1096,7 @@ public:
 			{
 				vp->next->pred = vp->pred;
 			}
+			// some value should be changed here
 			delete_value_node(vp);
 		}
 		return ret;
@@ -1034,7 +1104,7 @@ public:
 
 	iterator erase(const_iterator it)
 	{
-		return erase(it);
+		return erase(iterator(it.tnode, it.vnode));
 	}
 
 	template<typename Iter>
@@ -1051,14 +1121,38 @@ public:
 		return erase(container.begin(), container.end());
 	}
 
+	template<typename Iter>
+	size_type erase_node(Iter first, Iter last)
+	{
+		return erase_node(find_node(first, last));
+	}
+
+	template<typename Container>
+	size_type erase_node(const Container &container)
+	{
+		return erase_node(container.begin(), container.end());
+	}
+
+// erase a range of iterators
+	void erase(iterator first, iterator last)
+	{
+		for (; first != last; ++first)
+			erase(first);
+	}
+
+
 // erase all subsequences with prefix
 	template<typename Iter>
 	void erase_prefix(Iter first, Iter last)
 	{
 		// it is hard to implement efficiently this function because maintaining counts and deleting nodes are difficult
+		/*
 		iterator_range ir = find_prefix(first, last);
 		for (iterator i = ir.first; i != ir.end(); ++i)
 			erase(i);
+			*/
+		node_ptr cur = find_node(first, last);
+		clear(cur);
 	}
 
 	template<typename Container>
@@ -1224,6 +1318,17 @@ public:
 	}
 
 	template<typename Iter>
+	size_type count(Iter first, Iter last)
+	{
+		return t.count(first, last);
+	}
+	template<typename Container>
+	size_type count(const Container& container)
+	{
+		return t.count(container);
+	}
+
+	template<typename Iter>
 	iterator_range find_prefix(Iter first, Iter last)
 	{
 		return t.find_prefix(first, last);
@@ -1367,6 +1472,18 @@ public:
 	}
 
 	template<typename Iter>
+	size_type count(Iter first, Iter last)
+	{
+		return t.count(first, last);
+	}
+
+	template<typename Container>
+	size_type count(const Container& container)
+	{
+		return t.count(container);
+	}
+
+	template<typename Iter>
 	iterator_range find_prefix(Iter first, Iter last)
 	{
 		return t.find_prefix(first, last);
@@ -1417,6 +1534,181 @@ public:
 	}
 
 	~trie_set()
+	{
+		t.destroy();
+	}
+
+};
+
+
+
+template<typename Key, class Compare = std::less<Key> >
+class trie_multiset
+{
+public:
+	typedef Key key_type;
+	typedef bool value_type;
+	typedef trie<key_type, value_type, Compare> trie_type;
+	typedef trie_multiset<Key, Compare> trie_multiset_type;
+	typedef typename trie_type::const_iterator iterator;
+	typedef typename trie_type::const_iterator const_iterator;
+	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
+	typedef typename trie_type::iterator_range iterator_range;
+	typedef size_t size_type;
+
+protected:
+	trie_type t;
+
+public:
+	explicit trie_multiset() : t()
+	{
+	}
+
+	explicit trie_multiset(const trie_multiset_type& other) : t(other.t)
+	{
+	}
+
+	trie_multiset_type& operator=(const trie_multiset_type& other)
+	{
+		t = other.t;
+		return *this;
+	}
+
+	iterator begin() 
+	{
+		return t.begin();
+	}
+
+	const_iterator cbegin() 
+	{
+		return t.cbegin();
+	}
+
+	iterator end() 
+	{
+		return t.end();
+	}
+
+	iterator rbegin() 
+	{
+		return t.rbegin();
+	}
+
+	iterator rend() 
+	{
+		return t.rend();
+	}
+
+	template<typename Iter>
+	iterator insert(Iter first, Iter last)
+	{
+		return t.insert_equal(first, last, value_type());
+	}
+
+	template<typename Container>
+	iterator insert(const Container& container)
+	{
+		return t.insert_equal(container, value_type());
+	}
+
+	template<typename Iter>
+	iterator find(Iter first, Iter last)
+	{
+		return t.find(first, last);
+	}
+
+	template<typename Container>
+	iterator find(const Container& container)
+	{
+		return t.find(container);
+	}
+
+// equal range() to find elements with same key     to be complete
+	template<typename Iter>
+	iterator equal_range(Iter first, Iter last)
+	{
+		return t.find(first, last);
+	}
+
+	template<typename Container>
+	iterator equal_range(const Container& container)
+	{
+		return t.find(container);
+	}
+
+// count() to count elements with the same key
+	template<typename Iter>
+	size_type count(Iter first, Iter last)
+	{
+		return t.count(first, last);
+	}
+
+	template<typename Container>
+	size_type count(const Container& container)
+	{
+		return t.count(container);
+	}
+
+// find_prefix() to find elements with the same prefix
+	template<typename Iter>
+	iterator_range find_prefix(Iter first, Iter last)
+	{
+		return t.find_prefix(first, last);
+	}
+
+	template<typename Container>
+	iterator_range find_prefix(const Container& container)
+	{
+		return t.find_prefix(container);
+	}
+
+// count_node() to count trie_node in trie
+	size_type count_node() const
+	{
+		return t.count_node();
+	}
+
+// size() to count value in trie
+	size_type size() const
+	{
+		return t.size();
+	}
+
+	bool empty()
+	{
+		return t.empty();
+	}
+
+	// erase by a single iterator
+	iterator erase(iterator it)
+	{
+		return t.erase(it);
+	}
+	
+	// erase by a range of iterators
+	void erase(iterator first, iterator last)
+	{
+		t.erase(first, last);
+	}
+
+	template<typename Container>
+	iterator erase_range(const Container &container)
+	{
+		return t.erase(container);
+	}
+
+	template<typename Iter>
+	iterator erase_range(Iter first, Iter last)
+	{
+		return t.erase(first, last);
+	}
+
+	void clear()
+	{
+		t.clear();
+	}
+
+	~trie_multiset()
 	{
 		t.destroy();
 	}
