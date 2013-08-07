@@ -5,9 +5,11 @@
 
 
 import testing ;
+import modules ;
 
 using gcc ;
 
+local boost_root = [ modules.peek : BOOST_ROOT ] ;
 project
     : requirements 
 	  <include>$(boost_root)

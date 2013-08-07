@@ -4,9 +4,6 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 
-import os ;
-import modules ;
-path-constant boost_root : [ modules.peek : BOOST_ROOT ] ;
 
 
 
