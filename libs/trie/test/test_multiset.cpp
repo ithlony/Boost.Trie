@@ -9,6 +9,7 @@ BOOST_AUTO_TEST_SUITE(trie_multiset_test)
 
 typedef boost::tries::trie_multiset<char> tmsi;
 typedef typename tmsi::iterator ti;
+typedef typename tmsi::reverse_iterator rti;
 
 BOOST_AUTO_TEST_CASE(insert_find_test)
 {
@@ -163,6 +164,53 @@ BOOST_AUTO_TEST_CASE(equal_range_test)
 	BOOST_CHECK_MESSAGE(count == 2, count);
 }
 
+BOOST_AUTO_TEST_CASE(reverse_iterator_test)
+{
+	tmsi a;
+	std::string s = "aaa", s2 = "bbb";
+
+	a.insert(s);
+	a.insert(s2);
+	//a.insert(s);
+
+	int count = 0;
+	rti ri = a.rbegin();
+	for (; ri != a.rend(); ++ri)
+	{
+		++count;
+	}
+	BOOST_CHECK_MESSAGE(count == a.size(), count);
+
+	ti i = a.begin();
+	rti j(i); // convert iterator to reverse_iterator
+	//a.erase(a.rbegin()); // compile error, which is the same as std::set
+	a.erase(a.begin()); 
+	BOOST_CHECK_MESSAGE(a.size() == 1, a.size());
+
+	a.clear();
+
+	a.insert(s);
+	a.insert(s2);
+	a.insert(s);
+
+	count = 0;
+	i = a.begin();
+	for (; i != a.end(); ++i)
+	{
+		++count;
+	}
+	BOOST_CHECK_MESSAGE(count == a.size(), count);
+
+	count = 0;
+	ri = a.rbegin();
+	for (; ri != a.rend(); ++ri)
+	{
+		std::vector<char> vs = ri.get_key();
+		std::cout << vs[0] << std::endl;
+		++count;
+	}
+	BOOST_CHECK_MESSAGE(count == a.size(), count);
+}
 /*
 BOOST_AUTO_TEST_CASE(insert_and_find_test)
 {
