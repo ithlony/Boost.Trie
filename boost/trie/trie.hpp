@@ -193,7 +193,7 @@ struct trie_iterator
 	typedef Pointer ptr;
 	typedef trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
 	typedef trie_iterator<Key, Value, Reference, Pointer, Compare> iter_type;
-	typedef iterator self;
+	typedef iter_type self;
 	typedef trie_iterator<Key, Value, const Value&, const Value*, Compare> const_iterator;
 	typedef trie_node<Key, Value, Compare> trie_node_type;
 	typedef trie_node_type* trie_node_ptr;
@@ -216,7 +216,7 @@ public:
 	{
 	}
 
-	trie_iterator(trie_node_ptr t, value_node_ptr v) : tnode(t), vnode(v)
+	explicit trie_iterator(trie_node_ptr t, value_node_ptr v) : tnode(t), vnode(v)
 	{
 	}
 
@@ -1043,15 +1043,140 @@ public:
 	{
 		return find_prefix(container.begin(), container.end());
 	}
+	
+// find by prefix, return a pair of iterator(begin, end)
+	template<typename Iter>
+	size_type count_prefix(Iter first, Iter last)
+	{
+		node_ptr node = find_node(first, last);
+		if (node == NULL)
+		{
+			return 0;
+		}
+		// not available now !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		return node->value_count;
+	}
 
-private:
+	template<typename Container>
+	size_type count_prefix(const Container &container)
+	{
+		return count_prefix(container.begin(), container.end());
+	}
+
+// upper_bound() to find the first node that greater than the key
+	template<typename Iter>
+	node_ptr upper_bound(Iter first, Iter last)
+	{
+		node_ptr cur = root;
+		// use a stack to store iterator in order to avoid the iterator cannot go backward
+		std::stack< Iter > si;
+		for (; first != last; ++first)
+		{
+			si.push(first);
+			const key_type& cur_key = *first;
+			typename node_type::child_iter ci = cur->child.find(cur_key);
+			// using upper_bound needs comparison in every step, so using find until ci == NULL
+			if (ci == cur->child.end())
+			{
+				// find a node that
+				ci = cur->child.upper_bound(cur_key);
+				si.pop();
+				while (ci == cur->child.end())
+				{
+					if (cur->parent == NULL)
+						return root;
+					cur = cur->parent;
+					ci = cur->child.upper_bound(*si.top());
+				}
+				cur = ci->second;
+				while (cur->no_value())
+				{
+					cur = cur->child.begin()->second;
+				}
+				return cur;
+			}
+			cur = ci->second;
+		}
+		// if find a full match, then increment it
+		iterator tmp(cur);
+		//++tmp;
+		tmp.trie_node_increment();
+		cur = tmp.tnode;
+
+		return cur;
+	}
+
+	template<typename Container>
+	node_ptr upper_bound(const Container &container)
+	{
+		return upper_bound(container.begin(), container.end());
+	}
+
+// lower_bound()
+	template<typename Iter>
+	node_ptr lower_bound(Iter first, Iter last)
+	{
+		node_ptr cur = root;
+		// use a stack to store iterator in order to avoid the iterator cannot go backward
+		std::stack< Iter > si;
+		for (; first != last; ++first)
+		{
+			si.push(first);
+			const key_type& cur_key = *first;
+			typename node_type::child_iter ci = cur->child.find(cur_key);
+			// using upper_bound needs comparison in every step, so using find until ci == NULL
+			if (ci == cur->child.end())
+			{
+				// find a node that
+				ci = cur->child.upper_bound(cur_key);
+				si.pop();
+				while (ci == cur->child.end())
+				{
+					if (cur->parent == NULL)
+						return root;
+					cur = cur->parent;
+					ci = cur->child.upper_bound(*si.top());
+				}
+				cur = ci->second;
+				while (cur->no_value())
+				{
+					cur = cur->child.begin()->second;
+				}
+				return cur;
+			}
+			cur = ci->second;
+		}
+		// lower_bound() needn't increment here!!!
+		return cur;
+	}
+
+	template<typename Container>
+	node_ptr lower_bound(const Container &container)
+	{
+		return lower_bound(container.begin(), container.end());
+	}
+
+// equal_range() is the same as find_prefix? the meaning is different
+	template<typename Iter>
+	iterator_range equal_range(Iter first, Iter last)
+	{
+		return make_pair(lower_bound(first, last), upper_bound(first, last));
+	}
+
+	template<typename Container>
+	iterator_range equal_range(const Container &container)
+	{
+		return equal_range(container.begin(), container.end());
+	}
 
 public:
 	//erase one node with value, and erase empty ancestors
-	void erase_node(node_ptr node)
+	size_type erase_node(node_ptr node)
 	{
+		size_type ret = 0;
 		if (node == NULL)
-			return;
+			return ret;
+		ret = node->self_value_count;
 		node_ptr cur = node;
 		erase_value_list(cur);
 		do {
@@ -1060,6 +1185,7 @@ public:
 			delete_trie_node(cur);
 			cur = parent;
 		} while (cur != root && cur->child.empty() && cur->no_value());
+		return ret;
 	}
 
 	// erase one value, after erasing value, check if it is necessary to erase node
@@ -1098,6 +1224,8 @@ public:
 			}
 			// some value should be changed here
 			delete_value_node(vp);
+			cur->self_value_count--;
+			root->value_count--;
 		}
 		return ret;
 	}
@@ -1611,6 +1739,7 @@ public:
 		return t.insert_equal(container, value_type());
 	}
 
+// find() to find the first element that equal
 	template<typename Iter>
 	iterator find(Iter first, Iter last)
 	{
@@ -1625,15 +1754,15 @@ public:
 
 // equal range() to find elements with same key     to be complete
 	template<typename Iter>
-	iterator equal_range(Iter first, Iter last)
+	iterator_range equal_range(Iter first, Iter last)
 	{
-		return t.find(first, last);
+		return t.equal_range(first, last);
 	}
 
 	template<typename Container>
-	iterator equal_range(const Container& container)
+	iterator_range equal_range(const Container& container)
 	{
-		return t.find(container);
+		return t.equal_range(container);
 	}
 
 // count() to count elements with the same key
@@ -1692,15 +1821,15 @@ public:
 	}
 
 	template<typename Container>
-	iterator erase_range(const Container &container)
+	size_type erase(const Container &container)
 	{
-		return t.erase(container);
+		return t.erase_node(container);
 	}
 
 	template<typename Iter>
-	iterator erase_range(Iter first, Iter last)
+	size_type erase(Iter first, Iter last)
 	{
-		return t.erase(first, last);
+		return t.erase_node(first, last);
 	}
 
 	void clear()

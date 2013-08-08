@@ -65,7 +65,104 @@ BOOST_AUTO_TEST_CASE(erase_test)
 	BOOST_CHECK(a.find(s) == a.end());
 	BOOST_CHECK(a.count(s) == 0);
 
+	i = a.insert(s);
+	i = a.insert(s);
+	a.erase(i);
+	BOOST_CHECK_MESSAGE(a.size() == 1, a.size());
+	BOOST_CHECK(a.find(s) != a.end());
+	BOOST_CHECK_MESSAGE(a.count(s) == 1, a.count(s));
+	i = a.insert(s);
+	BOOST_CHECK_MESSAGE(a.size() == 2, a.size());
+	BOOST_CHECK(a.find(s) != a.end());
+	BOOST_CHECK_MESSAGE(a.count(s) == 2, a.count(s));
+
+	i = a.insert(s);
+	i = a.insert(s);
+	a.erase(s);
+	BOOST_CHECK_MESSAGE(a.size() == 0, a.size());
+	BOOST_CHECK(a.find(s) == a.end());
+	BOOST_CHECK_MESSAGE(a.count(s) == 0, a.count(s));
+
+	BOOST_CHECK_MESSAGE(a.count_node() == 0, a.count_node());
+	i = a.insert(s2);
+	BOOST_CHECK_MESSAGE(a.count_node() == 3, a.count_node());
+	i = a.insert(s);
+	BOOST_CHECK_MESSAGE(a.count_node() == 6, a.count_node());
+
+	BOOST_CHECK_MESSAGE(a.size() == 2, a.size());
+	BOOST_CHECK(a.find(s) != a.end());
+	BOOST_CHECK_MESSAGE(a.count(s) == 1, a.count(s));
+
+	i = a.insert(s);
+	BOOST_CHECK_MESSAGE(a.size() == 3, a.size());
+	BOOST_CHECK_MESSAGE(a.count(s) == 2, a.count(s));
+
+	i = a.insert(s2);
+	BOOST_CHECK_MESSAGE(a.size() == 4, a.size());
+	BOOST_CHECK_MESSAGE(a.count(s2) == 2, a.count(s2));
+
+	i = a.erase(i);
+	BOOST_CHECK_MESSAGE(a.size() == 3, a.size());
+	BOOST_CHECK_MESSAGE(a.count(s2) == 1, a.count(s2));
+
+	a.erase(i);
+	BOOST_CHECK_MESSAGE(a.size() == 2, a.size());
+	BOOST_CHECK_MESSAGE(a.count(s2) == 0, a.count(s2));
+	
+	a.insert(s2);
+	a.insert(s);
+	i = a.begin();
+	int size = 3;
+	while (i != a.end())
+	{
+		i = a.erase(i);
+		BOOST_CHECK_MESSAGE(a.size() == size, a.size());
+		--size;
+	}
 }
+
+BOOST_AUTO_TEST_CASE(equal_range_test)
+{
+	tmsi a;
+	ti i;
+	std::string s = "aaa", s2 = "bbb";
+
+
+	i = a.insert(s);
+	a.erase(i);
+	std::cout << "dd" << std::endl;
+	std::pair< ti, ti > pii = a.equal_range(s);
+	int count = 0;
+	std::cout << "dd" << std::endl;
+	ti first = pii.first, last = pii.second;
+	for (; first != last; ++first)
+	{
+		++count;
+	}
+	std::cout << "dd" << std::endl;
+	BOOST_CHECK_MESSAGE(count == 0, count);
+	i = a.insert(s);
+	pii = a.equal_range(s);
+	count = 0;
+	first = pii.first, last = pii.second;
+	for (; first != last; ++first)
+	{
+		++count;
+	}
+	BOOST_CHECK_MESSAGE(a.count(s) == 1, a.count(s));
+	BOOST_CHECK_MESSAGE(count == 1, count);
+	i = a.insert(s);
+	pii = a.equal_range(s);
+	count = 0;
+	first = pii.first, last = pii.second;
+	for (; first != last; ++first)
+	{
+		++count;
+	}
+	BOOST_CHECK_MESSAGE(a.count(s) == 2, a.count(s));
+	BOOST_CHECK_MESSAGE(count == 2, count);
+}
+
 /*
 BOOST_AUTO_TEST_CASE(insert_and_find_test)
 {
