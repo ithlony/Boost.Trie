@@ -80,18 +80,23 @@ BOOST_AUTO_TEST_CASE(iterator_operator_plus)
 	t[s2] = 3;
 	BOOST_CHECK(t.begin() != t.end());
 	boost::tries::trie_map<char, int>::iterator ti;
+	std::cout << "dfd" << std::endl;
 	ti = t.begin();
 	BOOST_CHECK(*ti == 1);
+	std::cout << "dfd" << std::endl;
 	++ti;
 	BOOST_CHECK(*ti == 2);
+	std::cout << "dfd" << std::endl;
 	BOOST_CHECK(t[s2] == 3);
 	++ti;
 	BOOST_CHECK(*ti == 3);
+	std::cout << "dfd" << std::endl;
 	++ti;
 	BOOST_CHECK(ti == t.end());
 	// test ++end()
 	++ti;
 	BOOST_CHECK(ti == t.end());
+	std::cout << "dfd" << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(iterator_operator_minus)

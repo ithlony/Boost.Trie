@@ -64,6 +64,8 @@ private:
 	}
 };
 
+
+
 template <typename Key, typename Value, class Compare>
 struct trie_node {
 //protected:
@@ -184,6 +186,8 @@ private:
 	}
 };
 
+
+
 template <typename Key, typename Value, typename Reference, typename Pointer, class Compare>
 struct trie_iterator
 {
@@ -288,16 +292,19 @@ public:
 	void trie_node_increment()
 	{
 		// at iterator end
+		std::cout << tnode << std::endl;
 		if (tnode->parent == NULL)
 			return;
 		trie_node_ptr cur = tnode;
 		if (!cur->child.empty())
 		{ // go down to the first node with a value in it, and there always be at least one
+			std::cout << "bbb" << std::endl;
 			do {
 				cur = cur->child.begin()->second;
 			} while (cur->no_value());
 			tnode = cur;
 		} else {
+			std::cout << "ccc" << std::endl;
 			// go up till there is a sibling next to cur
 			// the algorithm here is not so efficient
 			while (cur->parent != NULL)
@@ -370,8 +377,11 @@ public:
 			vnode = (value_node_ptr)vnode->next;
 			return;
 		}
+		//std::cout << "aaa" << std::endl;
 		trie_node_increment();
+		//std::cout << "aaa" << std::endl;
 		vnode = tnode->value_list_header;
+		//std::cout << "aaa" << std::endl;
 	}
 
 	void decrement()
@@ -382,8 +392,7 @@ public:
 			return;
 		}
 		trie_node_decrement();
-		// should not be header, but tail instead!!!!
-		vnode = tnode->value_list_header;
+		vnode = tnode->value_list_tail;
 	}
 
 	self& operator++() 
@@ -479,6 +488,8 @@ public:
 		return tmp;
 	}
 };
+
+
 
 /*
 template <typename Key, typename Reference, typename Pointer, class Compare>
@@ -656,6 +667,8 @@ public:
 
 } // namespace detail
 
+
+
 template <typename Key, typename Value,
 		 class Compare>
 class trie {
@@ -716,8 +729,9 @@ private:
 				delete_value_node(vp);
 				vp = tmp;
 			}
-			cur->self_value_count = 0;
 		}
+		cur->self_value_count = 0;
+		cur->value_list_header = cur->value_list_tail = NULL;
 	}
 
 	node_ptr get_trie_node() 
@@ -754,9 +768,26 @@ private:
 		{
 			++root->node_count;
 			new(tmp) node_type();
-			tmp->value_list_header = new_value_node(value);
+			value_node_ptr vn = new_value_node(value); 
+			value_list_push(tmp, vn);
 		}
 		return tmp;
+	}
+
+	void value_list_push(node_ptr tmp, value_node_ptr vn)
+	{
+		vn->node_in_trie = tmp;
+		vn->next = tmp->value_list_header;
+		if (tmp->value_list_header != NULL)
+		{
+			tmp->value_list_header->pred = vn;
+		}
+		else {
+			// empty list
+			tmp->value_list_tail = vn;
+		}
+		tmp->value_list_header = vn;
+		++tmp->self_value_count;
 	}
 
 	node_ptr create_trie_node(value_node_ptr vl_header)
@@ -769,10 +800,7 @@ private:
 			while (vl_header != NULL)
 			{
 				value_node_ptr vn = new_value_node(vl_header->value); 
-				vn->next = tmp->value_list_header;
-				if (tmp->value_list_header != NULL)
-					tmp->value_list_header->pred = vn;
-				tmp->value_list_header = vn;
+				value_list_push(tmp, vn);
 				vl_header = (value_node_ptr)vl_header->next;
 			}
 		}
@@ -823,12 +851,7 @@ private:
 	value_node_ptr rightmost_value(node_ptr node) const
 	{
 		node = rightmost_node(node);
-		value_node_ptr vlp = node->value_list_header;
-		while (vlp->next != NULL)
-		{
-			vlp = (value_node_ptr)vlp->next;
-		}
-		return vlp;
+		return (value_node_ptr)node->value_list_tail;
 	}
 
 	// copy the whole trie tree
@@ -972,13 +995,8 @@ public:
 			cur = ci->second;
 		}
 		// insert the new value node into value_list
-		value_node_ptr value_node = new_value_node(value);
-		value_node->node_in_trie = cur;
-		value_node->next = cur->value_list_header;
-		if (cur->value_list_header != NULL)
-			cur->value_list_header->pred = value_node;
-		cur->value_list_header = value_node;
-		++cur->self_value_count;
+		value_node_ptr vn = new_value_node(value);
+		value_list_push(cur, vn);
 
 		++root->value_count;
 
@@ -1267,7 +1285,7 @@ public:
 		++ret;
 		value_node_ptr vp = it.vnode;
 		node_ptr cur = it.tnode;
-		if (it.vnode->next == NULL && it.vnode->pred == NULL)
+		if (vp->next == NULL && vp->pred == NULL)
 		{
 			erase_value_list(cur);
 			if (!cur->child.empty())
@@ -1291,6 +1309,9 @@ public:
 			if (vp->next)
 			{
 				vp->next->pred = vp->pred;
+			}
+			else { // is value_list_tail
+				cur->value_list_tail = (value_node_ptr)vp->pred;
 			}
 			// some value should be changed here
 			delete_value_node(vp);
@@ -1427,6 +1448,8 @@ public:
 	}
 
 };
+
+
 
 template<typename Key, typename Value,
 		class Compare = std::less<Key> >
@@ -1587,6 +1610,8 @@ public:
 	}
 
 };
+
+
 
 template<typename Key, class Compare = std::less<Key> >
 class trie_set
