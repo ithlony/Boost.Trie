@@ -14,7 +14,7 @@ project
     : requirements 
 	  <include>$(boost_root)
 	  <include>../../../
-	  <library>$(boost_root)/stage/lib/libboost_unit_test_framework-mgw46-mt-1_53.a
+	  <library>$(boost_root)stage/lib/libboost_unit_test_framework.a
 	;
 
 run test_map.cpp ;
