@@ -24,8 +24,8 @@ before_install:
  - mv boost-trunk-release-Boost_1_54_0 $HOME/boost-trunk
  - BOOST="$HOME/boost-trunk"
  - BOOST_ROOT="$HOME/boost-trunk"
- - export $BOOST_ROOT
- - export $BOOST
+ - export BOOST_ROOT
+ - export BOOST
  - PROJECTPATH="$HOME/build/ithlony/Boost.Trie"
 
 #create symbolic links for trie
