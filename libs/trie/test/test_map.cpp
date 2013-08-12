@@ -17,11 +17,8 @@ BOOST_AUTO_TEST_CASE(operator_test)
 	BOOST_CHECK(t[s] == 1);
 	t[s] = 2;
 	BOOST_CHECK(t[s] == 2);
-	std::cout << t[s] << ' ' << t[s2] << std::endl;
 	t[s2] = t[s];
-	std::cout << t[s] << ' ' << t[s2] << std::endl;
 	BOOST_CHECK(t[s] == t[s2]);
-
 }
 
 BOOST_AUTO_TEST_CASE(insert_and_find_test)

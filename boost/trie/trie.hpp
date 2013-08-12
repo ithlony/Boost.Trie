@@ -1439,6 +1439,7 @@ public:
 	void destroy()
 	{
 		clear(root);
+		std::cout << "clear" << std::endl;
 		delete_trie_node(root);
 	}
 
@@ -1512,6 +1513,7 @@ public:
 	template<typename Container>
 	value_type& operator [] (const Container& container)
 	{
+		std::cout << "iu" << std::endl;
 		return *(t.insert_unique(container, value_type()).first);
 	}
 
@@ -1606,7 +1608,6 @@ public:
 
 	~trie_map()
 	{
-		t.destroy();
 	}
 
 };
@@ -1758,7 +1759,6 @@ public:
 
 	~trie_set()
 	{
-		t.destroy();
 	}
 
 };
@@ -1941,7 +1941,6 @@ public:
 
 	~trie_multiset()
 	{
-		t.destroy();
 	}
 
 };
