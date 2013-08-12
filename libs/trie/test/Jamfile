@@ -8,6 +8,7 @@ import testing ;
 import modules ;
 
 using gcc ;
+#using clang ;
 
 local boost_root = [ modules.peek : BOOST_ROOT ] ;
 project
@@ -19,5 +20,6 @@ project
 
 run test_map.cpp ;
 run test_multiset.cpp ;
+run test_multimap.cpp ;
 run test_custom_type.cpp ;
 run antony_test.cpp ;

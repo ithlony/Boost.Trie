@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE trie_test
 #include <boost/test/unit_test.hpp>
 #include "boost/trie/trie.hpp"
-#include "boost/trie/trie.hpp"
+#include "boost/trie/trie_map.hpp"
 #include <string>
 #include <iostream>
 

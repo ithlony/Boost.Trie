@@ -1,7 +1,10 @@
 #define BOOST_TEST_MODULE trie_test
 #include <boost/test/unit_test.hpp>
+#include "boost/trie/trie_map.hpp"
+// multi include test
+#include "boost/trie/trie_map.hpp" 
 #include "boost/trie/trie.hpp"
-#include "boost/trie/trie.hpp"
+
 #include <string>
 #include <iostream>
 
@@ -56,14 +59,14 @@ BOOST_AUTO_TEST_CASE(copy_test)
 	BOOST_CHECK(t2[s3] == 4);
 	boost::tries::trie_map<char, int> t3(t2);
 	BOOST_CHECK(t3.size() == 4);
-	BOOST_CHECK(t3.count_node() == 8);
+	BOOST_CHECK_MESSAGE(t3.count_node() == 8, t3.count_node());
 	BOOST_CHECK(*t3.find(s) == 1);
 	BOOST_CHECK(*t3.find(s1) == 2);
 	BOOST_CHECK(*t3.find(s2) == 3);
 	BOOST_CHECK(*t3.find(s3) == 4);
 	t3[std::string("a")] = 10;
 	BOOST_CHECK(t3.size() == 5);
-	BOOST_CHECK(t3.count_node() == 8);
+	BOOST_CHECK_MESSAGE(t3.count_node() == 8, t3.count_node());
 	BOOST_CHECK(*t3.begin() == 10);
 }
 
@@ -144,10 +147,10 @@ BOOST_AUTO_TEST_CASE(clear)
 	BOOST_CHECK(t.size() == 4);
 	BOOST_CHECK(t.count_node() == node_cnt);
 	t.clear();
-	BOOST_CHECK(t.size() == 0);
+	BOOST_CHECK_MESSAGE(t.size() == 0, t.size());
 	BOOST_CHECK(t.count_node() == 0);
 	BOOST_CHECK(t[s] == 0);
-	BOOST_CHECK(t.size() == 1);
+	BOOST_CHECK_MESSAGE(t.size() == 1, t.size());
 	BOOST_CHECK(t.count_node() == 3);
 }
 
