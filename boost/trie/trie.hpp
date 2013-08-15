@@ -17,6 +17,7 @@
 #include <list>
 #include <boost/utility.hpp>
 
+
 namespace boost { namespace tries {
 
 namespace detail {
@@ -45,8 +46,7 @@ struct value_list_node : public list_node_base {
 	value_type value;
 	trie_node_ptr node_in_trie;
 	explicit value_list_node() : value(), node_in_trie(0)
-	{
-
+	{	
 	}
 
 	explicit value_list_node(const value_type& x) : value(x), node_in_trie(0)
@@ -1393,14 +1393,16 @@ public:
 
 // erase all subsequences with prefix
 	template<typename Iter>
-	void erase_prefix(Iter first, Iter last)
+	size_type erase_prefix(Iter first, Iter last)
 	{
 		node_ptr cur = find_node(first, last);
+		size_type ret = cur->value_count;
 		clear(cur);
+		return ret;
 	}
 
 	template<typename Container>
-	void erase_prefix(const Container &container)
+	size_type erase_prefix(const Container &container)
 	{
 		return erase_prefix(container.begin(), container.end());
 	}

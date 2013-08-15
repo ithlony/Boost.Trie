@@ -48,7 +48,12 @@ public:
 		return t.begin();
 	}
 
-	const_iterator cbegin() 
+	const_iterator begin() const
+	{
+		return t.begin();
+	}
+
+	const_iterator cbegin() const
 	{
 		return t.cbegin();
 	}
@@ -58,14 +63,44 @@ public:
 		return t.end();
 	}
 
+	const_iterator end() const
+	{
+		return t.end();
+	}
+
+	const_iterator cend() const
+	{
+		return t.cend();
+	}
+
 	reverse_iterator rbegin() 
 	{
 		return t.rbegin();
 	}
 
+	const_reverse_iterator rbegin() const
+	{
+		return t.rbegin();
+	}
+
+	const_reverse_iterator crbegin() const
+	{
+		return t.crbegin();
+	}
+
 	reverse_iterator rend() 
 	{
 		return t.rend();
+	}
+
+	const_reverse_iterator rend() const
+	{
+		return t.rend();
+	}
+
+	const_reverse_iterator crend() const
+	{
+		return t.crend();
 	}
 
 	template<typename Iter>
@@ -119,6 +154,18 @@ public:
 		return t.count(container);
 	}
 
+	template<typename Iter>
+	size_type count_prefix(Iter first, Iter last)
+	{
+		return t.count_prefix(first, last);
+	}
+
+	template<typename Container>
+	size_type count_prefix(const Container& container)
+	{
+		return t.count_prefix(container);
+	}
+
 // find_prefix() to find elements with the same prefix
 	template<typename Iter>
 	iterator_range find_prefix(Iter first, Iter last)
@@ -130,6 +177,85 @@ public:
 	iterator_range find_prefix(const Container& container)
 	{
 		return t.find_prefix(container);
+	}
+
+	// upper and lower bound
+	template<typename Iter>
+	iterator upper_bound(Iter first, Iter last)
+	{
+		return (iterator)t.upper_bound(first, last);
+	}
+
+	template<typename Container>
+	iterator upper_bound(const Container& container)
+	{
+		return (iterator)t.upper_bound(container);
+	}
+
+	template<typename Iter>
+	iterator lower_bound(Iter first, Iter last)
+	{
+		return (iterator)t.lower_bound(first, last);
+	}
+
+	template<typename Container>
+	iterator lower_bound(const Container& container)
+	{
+		return (iterator)t.lower_bound(container);
+	}
+
+	// erasions
+	iterator erase(iterator it)
+	{
+		return t.erase(it);
+	}
+
+	// iterator is equal to const_iterator
+	/*
+	iterator erase(const_iterator it)
+	{
+		return t.erase(it);
+	}
+	reverse_iterator erase(const_reverse_iterator it)
+	{
+		return t.erase(it);
+	}
+
+	*/
+
+	reverse_iterator erase(reverse_iterator it)
+	{
+		return t.erase(it);
+	}
+
+	// erase by a range of iterators
+	void erase(iterator first, iterator last)
+	{
+		t.erase(first, last);
+	}
+
+	template<typename Container>
+	size_type erase(const Container &container)
+	{
+		return t.erase_node(container);
+	}
+
+	template<typename Iter>
+	size_type erase(Iter first, Iter last)
+	{
+		return t.erase_node(first, last);
+	}
+
+	template<typename Container>
+	size_type erase_prefix(const Container &container)
+	{
+		return t.erase_prefix(container);
+	}
+
+	template<typename Iter>
+	size_type erase_prefix(Iter first, Iter last)
+	{
+		return t.erase_prefix(first, last);
 	}
 
 // count_node() to count trie_node in trie
@@ -149,33 +275,9 @@ public:
 		return t.empty();
 	}
 
-	// erase by a single iterator
-	iterator erase(iterator it)
+	void swap(const trie_multiset_type& other)
 	{
-		return t.erase(it);
-	}
-
-	reverse_iterator erase(reverse_iterator it)
-	{
-		return t.erase(it);
-	}
-	
-	// erase by a range of iterators
-	void erase(iterator first, iterator last)
-	{
-		t.erase(first, last);
-	}
-
-	template<typename Container>
-	size_type erase(const Container &container)
-	{
-		return t.erase_node(container);
-	}
-
-	template<typename Iter>
-	size_type erase(Iter first, Iter last)
-	{
-		return t.erase_node(first, last);
+		t.swap(other.t);
 	}
 
 	void clear()

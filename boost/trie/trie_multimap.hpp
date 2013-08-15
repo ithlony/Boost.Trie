@@ -21,6 +21,8 @@ public:
 	typedef trie_multimap<Key, Value, Compare> trie_multimap_type;
 	typedef typename trie_type::iterator iterator;
 	typedef typename trie_type::const_iterator const_iterator;
+	typedef typename trie_type::reverse_iterator reverse_iterator;
+	typedef typename trie_type::const_reverse_iterator const_reverse_iterator;
 	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
 	typedef typename trie_type::iterator_range iterator_range;
 	typedef size_t size_type;
@@ -43,12 +45,18 @@ public:
 		return *this;
 	}
 
+
 	iterator begin() 
 	{
 		return t.begin();
 	}
 
-	const_iterator cbegin() 
+	const_iterator begin() const
+	{
+		return t.begin();
+	}
+
+	const_iterator cbegin() const
 	{
 		return t.cbegin();
 	}
@@ -58,14 +66,44 @@ public:
 		return t.end();
 	}
 
-	iterator rbegin() 
+	const_iterator end() const
+	{
+		return t.end();
+	}
+
+	const_iterator cend() const
+	{
+		return t.cend();
+	}
+
+	reverse_iterator rbegin() 
 	{
 		return t.rbegin();
 	}
 
-	iterator rend() 
+	const_reverse_iterator rbegin() const
+	{
+		return t.rbegin();
+	}
+
+	const_reverse_iterator crbegin() const
+	{
+		return t.crbegin();
+	}
+
+	reverse_iterator rend() 
 	{
 		return t.rend();
+	}
+
+	const_reverse_iterator rend() const
+	{
+		return t.rend();
+	}
+
+	const_reverse_iterator crend() const
+	{
+		return t.crend();
 	}
 
 	template<typename Iter>
@@ -140,6 +178,76 @@ public:
 		return t.equal_range(container);
 	}
 
+	// upper and lower bound
+	template<typename Iter>
+	iterator upper_bound(Iter first, Iter last)
+	{
+		return (iterator)t.upper_bound(first, last);
+	}
+
+	template<typename Container>
+	iterator upper_bound(const Container& container)
+	{
+		return (iterator)t.upper_bound(container);
+	}
+
+	template<typename Iter>
+	iterator lower_bound(Iter first, Iter last)
+	{
+		return (iterator)t.lower_bound(first, last);
+	}
+
+	template<typename Container>
+	iterator lower_bound(const Container& container)
+	{
+		return (iterator)t.lower_bound(container);
+	}
+
+	//erasions
+	iterator erase(iterator it)
+	{
+		return t.erase(it);
+	}
+
+	iterator erase(const_iterator it)
+	{
+		return t.erase(it);
+	}
+
+	reverse_iterator erase(reverse_iterator it)
+	{
+		return t.erase(it);
+	}
+
+	reverse_iterator erase(const_reverse_iterator it)
+	{
+		return t.erase(it);
+	}
+
+	template<typename Container>
+	iterator erase(const Container &container)
+	{
+		return t.erase(container);
+	}
+
+	template<typename Iter>
+	iterator erase(Iter first, Iter last)
+	{
+		return t.erase(first, last);
+	}
+
+	template<typename Container>
+	size_type erase_prefix(const Container &container)
+	{
+		return t.erase_prefix(container);
+	}
+
+	template<typename Iter>
+	size_type erase_prefix(Iter first, Iter last)
+	{
+		return t.erase_prefix(first, last);
+	}
+
 	size_type count_node() const
 	{
 		return t.count_node();
@@ -155,27 +263,9 @@ public:
 		return t.empty();
 	}
 
-	// shoule change the type of return value to iterator
-	iterator erase(iterator it)
+	void swap(const trie_multimap_type& other)
 	{
-		return t.erase(it);
-	}
-
-	iterator erase(const_iterator it)
-	{
-		return t.erase(it);
-	}
-
-	template<typename Container>
-	iterator erase(const Container &container)
-	{
-		return t.erase(container);
-	}
-
-	template<typename Iter>
-	iterator erase(Iter first, Iter last)
-	{
-		return t.erase(first, last);
+		t.swap(other.t);
 	}
 
 	void clear()
