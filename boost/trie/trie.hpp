@@ -101,11 +101,11 @@ struct trie_node : private boost::noncopyable {
 	value_list_ptr value_list_header;
 	value_list_ptr value_list_tail;
 
-	//value_list_ptr leftmost_value_node;
-	//value_list_ptr rightmost_value_node;
+	value_list_ptr leftmost_value_node;
+	value_list_ptr rightmost_value_node;
 
 	explicit trie_node() : parent(0), value_count(0), self_value_count(0), 
-	value_list_header(0), value_list_tail(0)//, leftmost_value_node(0), rightmost_value_node(0)
+	value_list_header(0), value_list_tail(0), leftmost_value_node(0), rightmost_value_node(0)
 	{
 	}
 
@@ -825,8 +825,11 @@ private:
 
 	value_node_ptr leftmost_value(node_ptr node) const
 	{
+		/*
 		node = leftmost_node(node);
 		return static_cast<value_node_ptr>(node->value_list_header);
+		*/
+		return node->leftmost_value_node;
 	}
 
 	// need constant time to get rightmost
@@ -842,8 +845,29 @@ private:
 
 	value_node_ptr rightmost_value(node_ptr node) const
 	{
+		/*
 		node = rightmost_node(node);
 		return static_cast<value_node_ptr>(node->value_list_tail);
+		*/
+		return node->rightmost_value_node;
+	}
+
+	void update_left_and_right(node_ptr node)
+	{
+		if (node->child.empty())
+		{
+			node->leftmost_value_node = node->value_list_header;
+			node->rightmost_value_node = node->value_list_tail;
+			return;
+		}
+		if (!node->no_value())
+		{
+			node->leftmost_value_node = node->value_list_header;
+		}
+		else {
+			node->leftmost_value_node = node->child.begin()->second->leftmost_value_node;
+		}
+		node->rightmost_value_node = node->child.rbegin()->second->rightmost_value_node;
 	}
 
 	// copy the whole trie tree
@@ -865,6 +889,9 @@ private:
 			node_ptr self_cur = self_node_stk.top();
 			if (ci_stk.top() == other_cur->child.end())
 			{
+				//all the child nodes of self_cur have been copied, update leftmost and rightmost value_node of the self_cur
+				update_left_and_right(self_cur);
+
 				other_node_stk.pop();
 				ci_stk.pop();
 				self_node_stk.pop();
@@ -1016,6 +1043,7 @@ public:
 			node_ptr tmp = cur;
 			while (tmp != NULL) // until root
 			{
+				update_left_and_right(tmp);
 				++tmp->value_count;
 				tmp = tmp->parent;
 			}
@@ -1264,10 +1292,18 @@ public:
 		}
 
 	// equal_range() is the same as find_prefix? the meaning is different
+	// equal_range() aims at one node, while find_prefix aims at the whole sub-trie
 	template<typename Iter>
 		iterator_range equal_range(Iter first, Iter last)
 		{
-			return make_pair(lower_bound(first, last), upper_bound(first, last));
+			// @that is not right here
+			//return make_pair(lower_bound(first, last), upper_bound(first, last));
+			node_ptr node = find_node(first, last);
+			if (node == NULL || node->value_list_header == NULL)
+				return make_pair(iterator(root), iterator(root));
+			iterator it_end = iterator(node->value_list_tail);
+			++it_end;
+			return make_pair(iterator(node->value_list_header), it_end);
 		}
 
 	template<typename Container>
@@ -1289,6 +1325,7 @@ public:
 		// update value_count on each ancestral node
 		while (cur != NULL)
 		{
+			update_left_and_right(cur);
 			cur->value_count -= delta;
 			cur = cur->parent;
 		}
@@ -1337,16 +1374,9 @@ public:
 			else { // is value_list_tail
 				cur->value_list_tail = static_cast<value_node_ptr>(vp->pred);
 			}
-			// some value should be changed here
 			delete_value_node(vp);
 
-			// update value_count on each ancestral node
-			node_ptr tmp = cur;
-			while (tmp != NULL)
-			{
-				--tmp->value_count;
-				tmp = tmp->parent;
-			}
+			erase_check_ancestor(cur, 1);
 		}
 		return ret;
 	}
