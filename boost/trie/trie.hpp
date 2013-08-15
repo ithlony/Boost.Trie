@@ -25,7 +25,7 @@ namespace detail {
 template <typename Key, typename Value, class Compare>
 struct trie_node;
 
-struct list_node_base {
+struct list_node_base : protected boost::noncopyable {
 	typedef list_node_base *base_ptr;
 	base_ptr pred;
 	base_ptr next;
@@ -53,6 +53,7 @@ struct value_list_node : public list_node_base {
 	{
 	}
 
+	/*
 private:
 	explicit value_list_node(const node_type&)
 	{
@@ -62,12 +63,13 @@ private:
 	node_type& operator=(const node_type&)
 	{
 	}
+	*/
 };
 
 
 
 template <typename Key, typename Value, class Compare>
-struct trie_node {
+struct trie_node : private boost::noncopyable {
 //protected:
 	typedef Key key_type;
 	typedef key_type* key_ptr;
@@ -99,13 +101,16 @@ struct trie_node {
 	value_list_ptr value_list_header;
 	value_list_ptr value_list_tail;
 
-	explicit trie_node() : parent(0), /*node_count(0), */value_count(0), self_value_count(0), value_list_header(0), value_list_tail(0)
+	//value_list_ptr leftmost_value_node;
+	//value_list_ptr rightmost_value_node;
+
+	explicit trie_node() : parent(0), value_count(0), self_value_count(0), 
+	value_list_header(0), value_list_tail(0)//, leftmost_value_node(0), rightmost_value_node(0)
 	{
 	}
 
 	const key_type& key_elem() const
 	{
-		// that seems unsafe?
 		return child_iter_of_parent->first;
 	}
 
@@ -119,6 +124,7 @@ struct trie_node {
 		return self_value_count == 0;
 	}
 
+	/*
 private:
 	explicit trie_node(const node_type&)
 	{
@@ -127,9 +133,11 @@ private:
 	node_type& operator=(const node_type&)
 	{
 	}
+	*/
 
 };
 
+/*
 template <typename Key, class Compare>
 struct trie_node<Key, void, Compare> {
 	typedef Key key_type;
@@ -148,21 +156,17 @@ struct trie_node<Key, void, Compare> {
 
 //public:
 	node_ptr parent;
-	// store the iterator to optimize operator++ and operator--
-	// utilize that the iterator in map does not change after insertion
 	child_iter child_iter_of_parent;
-	//size_type node_count;
 
 	size_type value_count;
 	size_type self_value_count;
 
-	explicit trie_node() : parent(0), /*node_count(0), */value_count(0), self_value_count(0)
+	explicit trie_node() : parent(0), value_count(0), self_value_count(0)
 	{
 	}
 
 	const key_type& key_elem() const
 	{
-		// that seems unsafe?
 		return child_iter_of_parent->first;
 	}
 
@@ -185,6 +189,7 @@ private:
 	{
 	}
 };
+*/
 
 
 
@@ -371,7 +376,7 @@ public:
 	{
 		if (vnode != NULL && vnode->next != NULL)
 		{
-			vnode = (value_node_ptr)vnode->next;
+			vnode = static_cast<value_node_ptr>(vnode->next);
 			return;
 		}
 		trie_node_increment();
@@ -382,7 +387,7 @@ public:
 	{
 		if (vnode != NULL && vnode->pred != NULL)
 		{
-			vnode = (value_node_ptr)vnode->pred;
+			vnode = static_cast<value_node_ptr>(vnode->pred);
 			return;
 		}
 		trie_node_decrement();
@@ -691,24 +696,20 @@ private:
 	value_node_ptr new_value_node(const value_type& x)
 	{
 		value_node_ptr v = value_alloc.allocate(1);
-		if (v != NULL)
-		{
-			new(v) value_node_type(x);
-			//value_alloc.construct(v, x);
-		}
+		if (v == NULL)
+			return v;
+		new(v) value_node_type(x);
 		return v;
 	}
 
 	bool delete_value_node(value_node_ptr p)
 	{
-		if (p)
-		{
-			value_alloc.destroy(p);
-			value_alloc.deallocate(p, 1);
-			--p->node_in_trie->self_value_count;
-			return true;
-		}
-		return false;
+		if (!p)
+			return false;
+		--p->node_in_trie->self_value_count;
+		value_alloc.destroy(p);
+		value_alloc.deallocate(p, 1);
+		return true;
 	}
 
 	void erase_value_list(node_ptr cur)
@@ -718,7 +719,7 @@ private:
 		{
 			while (vp != NULL)
 			{
-				value_node_ptr tmp = (value_node_ptr)vp->next;
+				value_node_ptr tmp = static_cast<value_node_ptr>(vp->next);
 				delete_value_node(vp);
 				vp = tmp;
 			}
@@ -794,7 +795,7 @@ private:
 			{
 				value_node_ptr vn = new_value_node(vl_header->value); 
 				value_list_push(tmp, vn);
-				vl_header = (value_node_ptr)vl_header->next;
+				vl_header = static_cast<value_node_ptr>(vl_header->next);
 			}
 		}
 		return tmp;
@@ -802,15 +803,13 @@ private:
 
 	bool delete_trie_node(node_ptr p)
 	{
-		if (p)
-		{
-			erase_value_list(p);
-			trie_node_alloc.destroy(p);
-			trie_node_alloc.deallocate(p, 1);
-			node_count--;
-			return true;
-		}
-		return false;
+		if (p == NULL)
+			return false;
+		erase_value_list(p);
+		trie_node_alloc.destroy(p);
+		trie_node_alloc.deallocate(p, 1);
+		node_count--;
+		return true;
 	}
 
 	// need constant time to get leftmost
@@ -827,7 +826,7 @@ private:
 	value_node_ptr leftmost_value(node_ptr node) const
 	{
 		node = leftmost_node(node);
-		return (value_node_ptr)node->value_list_header;
+		return static_cast<value_node_ptr>(node->value_list_header);
 	}
 
 	// need constant time to get rightmost
@@ -844,7 +843,7 @@ private:
 	value_node_ptr rightmost_value(node_ptr node) const
 	{
 		node = rightmost_node(node);
-		return (value_node_ptr)node->value_list_tail;
+		return static_cast<value_node_ptr>(node->value_list_tail);
 	}
 
 	// copy the whole trie tree
@@ -897,7 +896,7 @@ private:
 
 public:
 	// iterators still unavailable here
-	
+
 	explicit trie() : trie_node_alloc(), value_alloc(), root(create_root()), node_count(0)/*, value_count(0) */
 	{
 	}
@@ -997,285 +996,285 @@ public:
 	}
 
 	template<typename Iter>
-	iterator __insert(node_ptr cur, Iter first, Iter last,
-			const value_type& value)
-	{
-		for (; first != last; ++first)
+		iterator __insert(node_ptr cur, Iter first, Iter last,
+				const value_type& value)
 		{
-			const key_type& cur_key = *first;
-			node_ptr new_node = create_trie_node();
-			new_node->parent = cur;
-			typename node_type::child_iter ci = cur->child.insert(std::make_pair(cur_key, new_node)).first;
-			new_node->child_iter_of_parent = ci;
-			cur = ci->second;
-		}
-		// insert the new value node into value_list
-		value_node_ptr vn = new_value_node(value);
-		value_list_push(cur, vn);
+			for (; first != last; ++first)
+			{
+				const key_type& cur_key = *first;
+				node_ptr new_node = create_trie_node();
+				new_node->parent = cur;
+				typename node_type::child_iter ci = cur->child.insert(std::make_pair(cur_key, new_node)).first;
+				new_node->child_iter_of_parent = ci;
+				cur = ci->second;
+			}
+			// insert the new value node into value_list
+			value_node_ptr vn = new_value_node(value);
+			value_list_push(cur, vn);
 
-		// update value_count on the path
-		node_ptr tmp = cur;
-		while (tmp != NULL) // until root
-		{
-			++tmp->value_count;
-			tmp = tmp->parent;
-		}
+			// update value_count on the path
+			node_ptr tmp = cur;
+			while (tmp != NULL) // until root
+			{
+				++tmp->value_count;
+				tmp = tmp->parent;
+			}
 
-		return cur->value_list_header;
-	}
+			return cur->value_list_header;
+		}
 
 	template<typename Iter>
-	pair_iterator_bool insert_unique(Iter first, Iter last,
-			const value_type& value)
-	{
-		node_ptr cur = root;
-		for (; first != last; ++first)
+		pair_iterator_bool insert_unique(Iter first, Iter last,
+				const value_type& value)
 		{
-			const key_type& cur_key = *first;
-			typename node_type::child_iter ci = cur->child.find(cur_key);
-			if (ci == cur->child.end())
+			node_ptr cur = root;
+			for (; first != last; ++first)
+			{
+				const key_type& cur_key = *first;
+				typename node_type::child_iter ci = cur->child.find(cur_key);
+				if (ci == cur->child.end())
+				{
+					return std::make_pair(__insert(cur, first, last, value), true);
+				}
+				cur = ci->second;
+			}
+			if (cur->no_value())
 			{
 				return std::make_pair(__insert(cur, first, last, value), true);
 			}
-			cur = ci->second;
-		}
-		if (cur->no_value())
-		{
-			return std::make_pair(__insert(cur, first, last, value), true);
-		}
 
-		return std::make_pair((iterator)cur, false);
-	}
+			return std::make_pair((iterator)cur, false);
+		}
 
 	template<typename Container>
-	pair_iterator_bool insert_unique(const Container &container, const value_type& value)
-	{
-		return insert_unique(container.begin(), container.end(), value);
-	}
+		pair_iterator_bool insert_unique(const Container &container, const value_type& value)
+		{
+			return insert_unique(container.begin(), container.end(), value);
+		}
 
 	template<typename Iter>
-	iterator insert_equal(Iter first, Iter last,
-			const value_type& value)
-	{
-		node_ptr cur = root;
-		for (; first != last; ++first)
+		iterator insert_equal(Iter first, Iter last,
+				const value_type& value)
 		{
-			const key_type& cur_key = *first;
-			typename node_type::child_iter ci = cur->child.find(cur_key);
-			if (ci == cur->child.end())
+			node_ptr cur = root;
+			for (; first != last; ++first)
 			{
-				return __insert(cur, first, last, value);
-			}
-			cur = ci->second;
-		}
-		return __insert(cur, first, last, value);
-	}
-
-	template<typename Container>
-	iterator insert_equal(const Container &container, const value_type& value)
-	{
-		return insert_equal(container.begin(), container.end(), value);
-	}
-
-	template<typename Iter>
-	node_ptr find_node(Iter first, Iter last)
-	{
-		node_ptr cur = root;
-		for (; first != last; ++first)
-		{
-			const key_type& cur_key = *first;
-			typename node_type::child_iter ci = cur->child.find(cur_key);
-			if (ci == cur->child.end())
-			{
-				return NULL;
-			}
-			cur = ci->second;
-		}
-		return cur;
-	}
-
-	template<typename Container>
-	node_ptr find_node(const Container &container)
-	{
-		return find_node(container.begin(), container.end());
-	}
-
-	template<typename Iter>
-	iterator find(Iter first, Iter last)
-	{
-		node_ptr node = find_node(first, last);
-		if (node == NULL || node->no_value())
-			return end();
-		return node;
-	}
-
-	template<typename Container>
-	iterator find(const Container &container)
-	{
-		return find(container.begin(), container.end());
-	}
-
-// count
-	template<typename Iter>
-	size_type count(Iter first, Iter last)
-	{
-		node_ptr node = find_node(first, last);
-		if (node == NULL || node->no_value())
-			return 0;
-		return node->count();
-	}
-
-	template<typename Container>
-	size_type count(const Container &container)
-	{
-		return count(container.begin(), container.end());
-	}
-	
-// find by prefix, return a pair of iterator(begin, end)
-	template<typename Iter>
-	iterator_range find_prefix(Iter first, Iter last)
-	{
-		node_ptr node = find_node(first, last);
-		if (node == NULL)
-		{
-			return make_pair(end(), end());
-		}
-		iterator begin = leftmost_value(node);
-		// optimization is needed here
-		iterator end = rightmost_value(node);
-		++end;
-		return make_pair(begin, end);
-	}
-
-	template<typename Container>
-	iterator_range find_prefix(const Container &container)
-	{
-		return find_prefix(container.begin(), container.end());
-	}
-	
-// count_prefix() to count values with the same prefix
-	template<typename Iter>
-	size_type count_prefix(Iter first, Iter last)
-	{
-		node_ptr node = find_node(first, last);
-		if (node == NULL)
-		{
-			return 0;
-		}
-		return node->value_count;
-	}
-
-	template<typename Container>
-	size_type count_prefix(const Container &container)
-	{
-		return count_prefix(container.begin(), container.end());
-	}
-
-// upper_bound() to find the first node that greater than the key
-	template<typename Iter>
-	node_ptr upper_bound(Iter first, Iter last)
-	{
-		node_ptr cur = root;
-		// use a stack to store iterator in order to avoid the iterator cannot go backward
-		std::stack< Iter > si;
-		for (; first != last; ++first)
-		{
-			si.push(first);
-			const key_type& cur_key = *first;
-			typename node_type::child_iter ci = cur->child.find(cur_key);
-			// using upper_bound needs comparison in every step, so using find until ci == NULL
-			if (ci == cur->child.end())
-			{
-				// find a node that
-				ci = cur->child.upper_bound(cur_key);
-				si.pop();
-				while (ci == cur->child.end())
+				const key_type& cur_key = *first;
+				typename node_type::child_iter ci = cur->child.find(cur_key);
+				if (ci == cur->child.end())
 				{
-					if (cur->parent == NULL)
-						return root;
-					cur = cur->parent;
-					ci = cur->child.upper_bound(*si.top());
+					return __insert(cur, first, last, value);
 				}
 				cur = ci->second;
-				while (cur->no_value())
-				{
-					cur = cur->child.begin()->second;
-				}
-				return cur;
 			}
-			cur = ci->second;
+			return __insert(cur, first, last, value);
 		}
-		// if find a full match, then increment it
-		iterator tmp(cur);
-		//++tmp;
-		tmp.trie_node_increment();
-		cur = tmp.tnode;
-
-		return cur;
-	}
 
 	template<typename Container>
-	node_ptr upper_bound(const Container &container)
-	{
-		return upper_bound(container.begin(), container.end());
-	}
-
-// lower_bound()
-	template<typename Iter>
-	node_ptr lower_bound(Iter first, Iter last)
-	{
-		node_ptr cur = root;
-		// use a stack to store iterator in order to avoid the iterator cannot go backward
-		std::stack< Iter > si;
-		for (; first != last; ++first)
+		iterator insert_equal(const Container &container, const value_type& value)
 		{
-			si.push(first);
-			const key_type& cur_key = *first;
-			typename node_type::child_iter ci = cur->child.find(cur_key);
-			// using upper_bound needs comparison in every step, so using find until ci == NULL
-			if (ci == cur->child.end())
+			return insert_equal(container.begin(), container.end(), value);
+		}
+
+	template<typename Iter>
+		node_ptr find_node(Iter first, Iter last)
+		{
+			node_ptr cur = root;
+			for (; first != last; ++first)
 			{
-				// find a node that
-				ci = cur->child.upper_bound(cur_key);
-				si.pop();
-				while (ci == cur->child.end())
+				const key_type& cur_key = *first;
+				typename node_type::child_iter ci = cur->child.find(cur_key);
+				if (ci == cur->child.end())
 				{
-					if (cur->parent == NULL)
-						return root;
-					cur = cur->parent;
-					ci = cur->child.upper_bound(*si.top());
+					return NULL;
 				}
 				cur = ci->second;
-				while (cur->no_value())
-				{
-					cur = cur->child.begin()->second;
-				}
-				return cur;
 			}
-			cur = ci->second;
+			return cur;
 		}
-		// lower_bound() needn't increment here!!!
-		return cur;
-	}
 
 	template<typename Container>
-	node_ptr lower_bound(const Container &container)
-	{
-		return lower_bound(container.begin(), container.end());
-	}
+		node_ptr find_node(const Container &container)
+		{
+			return find_node(container.begin(), container.end());
+		}
 
-// equal_range() is the same as find_prefix? the meaning is different
 	template<typename Iter>
-	iterator_range equal_range(Iter first, Iter last)
-	{
-		return make_pair(lower_bound(first, last), upper_bound(first, last));
-	}
+		iterator find(Iter first, Iter last)
+		{
+			node_ptr node = find_node(first, last);
+			if (node == NULL || node->no_value())
+				return end();
+			return node;
+		}
 
 	template<typename Container>
-	iterator_range equal_range(const Container &container)
-	{
-		return equal_range(container.begin(), container.end());
-	}
+		iterator find(const Container &container)
+		{
+			return find(container.begin(), container.end());
+		}
+
+	// count
+	template<typename Iter>
+		size_type count(Iter first, Iter last)
+		{
+			node_ptr node = find_node(first, last);
+			if (node == NULL || node->no_value())
+				return 0;
+			return node->count();
+		}
+
+	template<typename Container>
+		size_type count(const Container &container)
+		{
+			return count(container.begin(), container.end());
+		}
+
+	// find by prefix, return a pair of iterator(begin, end)
+	template<typename Iter>
+		iterator_range find_prefix(Iter first, Iter last)
+		{
+			node_ptr node = find_node(first, last);
+			if (node == NULL)
+			{
+				return make_pair(end(), end());
+			}
+			iterator begin = leftmost_value(node);
+			// optimization is needed here
+			iterator end = rightmost_value(node);
+			++end;
+			return make_pair(begin, end);
+		}
+
+	template<typename Container>
+		iterator_range find_prefix(const Container &container)
+		{
+			return find_prefix(container.begin(), container.end());
+		}
+
+	// count_prefix() to count values with the same prefix
+	template<typename Iter>
+		size_type count_prefix(Iter first, Iter last)
+		{
+			node_ptr node = find_node(first, last);
+			if (node == NULL)
+			{
+				return 0;
+			}
+			return node->value_count;
+		}
+
+	template<typename Container>
+		size_type count_prefix(const Container &container)
+		{
+			return count_prefix(container.begin(), container.end());
+		}
+
+	// upper_bound() to find the first node that greater than the key
+	template<typename Iter>
+		node_ptr upper_bound(Iter first, Iter last)
+		{
+			node_ptr cur = root;
+			// use a stack to store iterator in order to avoid the iterator cannot go backward
+			std::stack< Iter > si;
+			for (; first != last; ++first)
+			{
+				si.push(first);
+				const key_type& cur_key = *first;
+				typename node_type::child_iter ci = cur->child.find(cur_key);
+				// using upper_bound needs comparison in every step, so using find until ci == NULL
+				if (ci == cur->child.end())
+				{
+					// find a node that
+					ci = cur->child.upper_bound(cur_key);
+					si.pop();
+					while (ci == cur->child.end())
+					{
+						if (cur->parent == NULL)
+							return root;
+						cur = cur->parent;
+						ci = cur->child.upper_bound(*si.top());
+					}
+					cur = ci->second;
+					while (cur->no_value())
+					{
+						cur = cur->child.begin()->second;
+					}
+					return cur;
+				}
+				cur = ci->second;
+			}
+			// if find a full match, then increment it
+			iterator tmp(cur);
+			//++tmp;
+			tmp.trie_node_increment();
+			cur = tmp.tnode;
+
+			return cur;
+		}
+
+	template<typename Container>
+		node_ptr upper_bound(const Container &container)
+		{
+			return upper_bound(container.begin(), container.end());
+		}
+
+	// lower_bound()
+	template<typename Iter>
+		node_ptr lower_bound(Iter first, Iter last)
+		{
+			node_ptr cur = root;
+			// use a stack to store iterator in order to avoid the iterator cannot go backward
+			std::stack< Iter > si;
+			for (; first != last; ++first)
+			{
+				si.push(first);
+				const key_type& cur_key = *first;
+				typename node_type::child_iter ci = cur->child.find(cur_key);
+				// using upper_bound needs comparison in every step, so using find until ci == NULL
+				if (ci == cur->child.end())
+				{
+					// find a node that
+					ci = cur->child.upper_bound(cur_key);
+					si.pop();
+					while (ci == cur->child.end())
+					{
+						if (cur->parent == NULL)
+							return root;
+						cur = cur->parent;
+						ci = cur->child.upper_bound(*si.top());
+					}
+					cur = ci->second;
+					while (cur->no_value())
+					{
+						cur = cur->child.begin()->second;
+					}
+					return cur;
+				}
+				cur = ci->second;
+			}
+			// lower_bound() needn't increment here!!!
+			return cur;
+		}
+
+	template<typename Container>
+		node_ptr lower_bound(const Container &container)
+		{
+			return lower_bound(container.begin(), container.end());
+		}
+
+	// equal_range() is the same as find_prefix? the meaning is different
+	template<typename Iter>
+		iterator_range equal_range(Iter first, Iter last)
+		{
+			return make_pair(lower_bound(first, last), upper_bound(first, last));
+		}
+
+	template<typename Container>
+		iterator_range equal_range(const Container &container)
+		{
+			return equal_range(container.begin(), container.end());
+		}
 
 	void erase_check_ancestor(node_ptr cur, size_type delta) // delete empty ancestors and update value_count
 	{
@@ -1286,7 +1285,7 @@ public:
 			delete_trie_node(cur);
 			cur = parent;
 		}
-		
+
 		// update value_count on each ancestral node
 		while (cur != NULL)
 		{
@@ -1329,18 +1328,18 @@ public:
 				vp->pred->next = vp->next;
 			}
 			else { // is value_list_header
-				cur->value_list_header = (value_node_ptr)vp->next;
+				cur->value_list_header = static_cast<value_node_ptr>(vp->next);
 			}
 			if (vp->next)
 			{
 				vp->next->pred = vp->pred;
 			}
 			else { // is value_list_tail
-				cur->value_list_tail = (value_node_ptr)vp->pred;
+				cur->value_list_tail = static_cast<value_node_ptr>(vp->pred);
 			}
 			// some value should be changed here
 			delete_value_node(vp);
-			
+
 			// update value_count on each ancestral node
 			node_ptr tmp = cur;
 			while (tmp != NULL)
@@ -1358,32 +1357,32 @@ public:
 	}
 
 	template<typename Iter>
-	iterator erase(Iter first, Iter last)
-	{
-		iterator it = find(first, last);
-		return erase(it);
+		iterator erase(Iter first, Iter last)
+		{
+			iterator it = find(first, last);
+			return erase(it);
 
-	}
+		}
 
 	template<typename Container>
-	iterator erase(const Container &container)
-	{
-		return erase(container.begin(), container.end());
-	}
+		iterator erase(const Container &container)
+		{
+			return erase(container.begin(), container.end());
+		}
 
 	template<typename Iter>
-	size_type erase_node(Iter first, Iter last)
-	{
-		return erase_node(find_node(first, last));
-	}
+		size_type erase_node(Iter first, Iter last)
+		{
+			return erase_node(find_node(first, last));
+		}
 
 	template<typename Container>
-	size_type erase_node(const Container &container)
-	{
-		return erase_node(container.begin(), container.end());
-	}
+		size_type erase_node(const Container &container)
+		{
+			return erase_node(container.begin(), container.end());
+		}
 
-// erase a range of iterators
+	// erase a range of iterators
 	void erase(iterator first, iterator last)
 	{
 		for (; first != last; ++first)
@@ -1391,40 +1390,40 @@ public:
 	}
 
 
-// erase all subsequences with prefix
+	// erase all subsequences with prefix
 	template<typename Iter>
-	size_type erase_prefix(Iter first, Iter last)
-	{
-		node_ptr cur = find_node(first, last);
-		size_type ret = cur->value_count;
-		clear(cur);
-		return ret;
-	}
+		size_type erase_prefix(Iter first, Iter last)
+		{
+			node_ptr cur = find_node(first, last);
+			size_type ret = cur->value_count;
+			clear(cur);
+			return ret;
+		}
 
 	template<typename Container>
-	size_type erase_prefix(const Container &container)
-	{
-		return erase_prefix(container.begin(), container.end());
-	}
+		size_type erase_prefix(const Container &container)
+		{
+			return erase_prefix(container.begin(), container.end());
+		}
 
-//
-// there could be two functions of erase_prefix(), one deletes nodes including the node itself, the other deletes only its children
-//
+	//
+	// there could be two functions of erase_prefix(), one deletes nodes including the node itself, the other deletes only its children
+	//
 
 
 
-	
+
 	size_type clear(node_ptr node)
 	{
 		// use vector to simulate stack, avoiding the possibility of stack overflow
 		// it is said that the using local type in template will be allowed in C++0x
 		/*
-		class stack_element {
-			node_ptr node;
-			typename node_type::child_iter ci;
-			typename node_type::child_iter ci_end;
-		};
-		*/
+		   class stack_element {
+		   node_ptr node;
+		   typename node_type::child_iter ci;
+		   typename node_type::child_iter ci_end;
+		   };
+		   */
 		node_ptr cur = node;
 		size_type ret = cur->value_count;
 		ret -= cur->self_value_count; // do not count values on the node
@@ -1465,7 +1464,7 @@ public:
 		std::swap(root, t.root);
 		std::swap(t.node_count, node_count);
 		std::swap(t.value_alloc, value_alloc);
-		std::swap(t.trie_node_allco, trie_node_alloc);
+		std::swap(t.trie_node_alloc, trie_node_alloc);
 	}
 
 	void clear()
@@ -1482,7 +1481,7 @@ public:
 	{
 		return root->value_count;
 	}
-	
+
 	bool empty() const {
 		return root->value_count == 0;
 	}
