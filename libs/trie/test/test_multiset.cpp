@@ -177,6 +177,8 @@ BOOST_AUTO_TEST_CASE(reverse_iterator_test)
 
 	int count = 0;
 	rti ri = a.rbegin();
+	if (ri == a.rend())
+		std::cout << "end" << std::endl;
 	for (; ri != a.rend(); ++ri)
 	{
 		++count;

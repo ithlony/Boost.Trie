@@ -199,8 +199,9 @@ struct trie_iterator
 	typedef std::bidirectional_iterator_tag iterator_category;
 	typedef Key key_type;
 	typedef Value value_type;
-	typedef Reference ref;
-	typedef Pointer ptr;
+	typedef Reference reference;
+	typedef Pointer pointer;
+	typedef ptrdiff_t difference_type;
 	typedef trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
 	typedef trie_iterator<Key, Value, Reference, Pointer, Compare> iter_type;
 	typedef iter_type self;
@@ -274,12 +275,12 @@ public:
 	}
 	*/
 
-	ref operator*() const 
+	reference operator*() const 
 	{
 		return vnode->value;
 	}
 
-	ptr operator->() const
+	pointer operator->() const
 	{
 		return &(operator*()); 
 	}
@@ -350,10 +351,10 @@ public:
 			p = cur->parent;
 			ci = cur->child_iter_of_parent;
 		}
-		// root
+		// p is root, that means the iterator is begin(), so do not change it
 		if (p == NULL)
 		{
-			tnode = cur;
+			//tnode = cur;
 			return;
 		}
 		// go down the trie
@@ -422,68 +423,93 @@ public:
 	}
 }; 
 
-template <typename Key, typename Value, typename Reference, typename Pointer, class Compare>
-struct trie_reverse_iterator : public trie_iterator<Key, Value, Reference, Pointer, Compare> {
-	typedef trie_iterator<Key, Value, Reference, Pointer, Compare> iterator;
-	typedef typename iterator::const_iterator const_iterator;
-	typedef trie_reverse_iterator<Key, Value, Value&, Value*, Compare> reverse_iterator;
-	typedef trie_reverse_iterator<Key, Value, Reference, Pointer, Compare> iter_type;
-	typedef iter_type self;
-	typedef trie_reverse_iterator<Key, Value, const Value&, const Value*, Compare> const_reverse_iterator;
-	typedef trie_node<Key, Value, Compare> trie_node_type;
-	typedef trie_node_type* trie_node_ptr;
-	typedef value_list_node<Key, Value, Compare> value_node_type;
-	typedef value_node_type* value_node_ptr;
+template <typename TrieIterator>
+struct trie_reverse_iterator {
+	typedef TrieIterator iter_type;
+	typedef trie_reverse_iterator<iter_type> self;
+	typedef typename std::iterator_traits<TrieIterator>::iterator_category iterator_category;
+	typedef typename std::iterator_traits<TrieIterator>::value_type value_type;
+	typedef typename std::iterator_traits<TrieIterator>::reference reference;
+	typedef typename std::iterator_traits<TrieIterator>::pointer pointer;
+	typedef typename std::iterator_traits<TrieIterator>::difference_type differcent_type;
+
+	typedef typename iter_type::key_type key_type;
+
+	private:
+	iter_type base_iter;
 
 public:
-	explicit trie_reverse_iterator() : iterator()
+	trie_reverse_iterator() 
 	{
 	}
 
-	trie_reverse_iterator(trie_node_ptr x) : iterator(x)
-	{
-	}
-
-	trie_reverse_iterator(value_node_ptr x) : iterator(x)
-	{
-	}
-
-	explicit trie_reverse_iterator(trie_node_ptr t, value_node_ptr v) : iterator(t, v)
-	{
-	}
-
-	trie_reverse_iterator(iterator it) : iterator(it)
+	explicit trie_reverse_iterator(iter_type it) : base_iter(it)
 	{
 
 	}
-	trie_reverse_iterator(const reverse_iterator &it) : iterator(it)
+	trie_reverse_iterator(const self &other) : base_iter(other.base())
 	{
 	}
+
+	template <typename Iter>
+	trie_reverse_iterator(const trie_reverse_iterator<Iter> &other) : base_iter(other.base())
+	{
+	}
+
+	iter_type base() const
+	{
+		return base_iter;
+	}
+
+	std::vector<key_type> get_key()
+	{
+		iter_type tmp = base_iter;
+		return (--tmp).get_key();
+	}
+
+	reference operator*() const 
+	{
+		iter_type tmp = base_iter;
+		return *--tmp;
+	}
+
+	pointer operator->() const
+	{
+		return &(operator*()); 
+	}
+
+	bool operator==(const self& other) const
+	{
+		return base() == other.base();
+	}
+
+	bool operator!=(const self& other) const
+	{
+		return base() != other.base();
+	}
+
 
 	self& operator++() 
 	{
-		iterator::decrement();
-		// increment
+		--base_iter;
 		return *this;
 	}
 	self operator++(int)
 	{
 		self tmp = *this;
-		iterator::decrement();
-		// increment
+		--base_iter;
 		return tmp;
 	}
 
 	self& operator--()
 	{
-		// decrement
-		iterator::increment();
+		++base_iter;
 		return *this;
 	}
 	self operator--(int)
 	{
 		self tmp = *this;
-		iterator::increment();
+		++base_iter;
 		return tmp;
 	}
 };
@@ -942,8 +968,10 @@ public:
 
 	typedef detail::trie_iterator<Key, Value, Value&, Value*, Compare> iterator;
 	typedef typename iterator::const_iterator const_iterator;
-	typedef detail::trie_reverse_iterator<Key, Value, Value&, Value*, Compare> reverse_iterator;
-	typedef typename reverse_iterator::const_reverse_iterator const_reverse_iterator;
+	typedef detail::trie_reverse_iterator<iterator> reverse_iterator;
+	typedef detail::trie_reverse_iterator<const_iterator> const_reverse_iterator;
+	//typedef detail::trie_reverse_iterator<Key, Value, Value&, Value*, Compare> reverse_iterator;
+	//typedef typename reverse_iterator::const_reverse_iterator const_reverse_iterator;
 	typedef std::pair<iterator, bool> pair_iterator_bool;
 	typedef std::pair<iterator, iterator> iterator_range;
 
@@ -988,18 +1016,12 @@ public:
 
 	reverse_iterator rbegin() 
 	{
-		value_node_ptr vp = rightmost_value(root);
-		if (vp == NULL)
-			return root;
-		else return vp;
+		return static_cast<reverse_iterator>(end());
 	}
 
 	const_reverse_iterator rbegin() const
 	{
-		value_node_ptr vp = rightmost_value(root);
-		if (vp == NULL)
-			return root;
-		else return vp;
+		return static_cast<const_reverse_iterator>(cend());
 	}
 
 	const_reverse_iterator crbegin() const
@@ -1009,12 +1031,12 @@ public:
 
 	reverse_iterator rend() 
 	{
-		return root;
+		return static_cast<reverse_iterator>(begin());
 	}
 
 	const_reverse_iterator rend() const
 	{
-		return root;
+		return static_cast<const_reverse_iterator>(cbegin());
 	}
 
 	const_reverse_iterator crend() const
@@ -1039,6 +1061,7 @@ public:
 			value_node_ptr vn = new_value_node(value);
 			value_list_push(cur, vn);
 
+			std::cout << cur << std::endl;
 			// update value_count on the path
 			node_ptr tmp = cur;
 			while (tmp != NULL) // until root

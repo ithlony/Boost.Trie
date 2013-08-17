@@ -176,8 +176,9 @@ BOOST_AUTO_TEST_CASE(iterator_operator_minus)
 	cti = t.begin();
 	BOOST_CHECK(*cti == 10);
 	--ti;
-	BOOST_CHECK(ti == t.end());
+	BOOST_CHECK(ti == t.begin());
 	BOOST_CHECK(t[s2] == 3);
+	ti = t.end();
 	--ti;
 	BOOST_CHECK(*ti == 2);
 	t[s3] = 4;
