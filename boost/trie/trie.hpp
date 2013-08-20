@@ -137,9 +137,10 @@ private:
 
 };
 
-/*
+
 template <typename Key, class Compare>
-struct trie_node<Key, void, Compare> {
+struct trie_node<Key, void, Compare> : private boost::noncopyable {
+//protected:
 	typedef Key key_type;
 	typedef key_type* key_ptr;
 	typedef void value_type;
@@ -156,12 +157,20 @@ struct trie_node<Key, void, Compare> {
 
 //public:
 	node_ptr parent;
+	// store the iterator to optimize operator++ and operator--
+	// utilize that the iterator in map does not change after insertion
 	child_iter child_iter_of_parent;
 
+	// it is used for something like count_prefix 
+	//size_type node_count;
 	size_type value_count;
 	size_type self_value_count;
+	//value_ptr value;
+	node_ptr leftmost_value_node;
+	node_ptr rightmost_value_node;
 
-	explicit trie_node() : parent(0), value_count(0), self_value_count(0)
+	explicit trie_node() : parent(0), value_count(0), self_value_count(0), 
+	leftmost_value_node(0), rightmost_value_node(0)
 	{
 	}
 
@@ -180,6 +189,7 @@ struct trie_node<Key, void, Compare> {
 		return self_value_count == 0;
 	}
 
+	/*
 private:
 	explicit trie_node(const node_type&)
 	{
@@ -188,9 +198,9 @@ private:
 	node_type& operator=(const node_type&)
 	{
 	}
-};
-*/
+	*/
 
+};
 
 
 template <typename Key, typename Value, typename Reference, typename Pointer, class Compare>
@@ -292,7 +302,7 @@ public:
 
 	bool operator!=(const trie_iterator& other) const
 	{
-		return tnode != tnode || vnode != other.vnode;
+		return tnode != other.tnode || vnode != other.vnode;
 	}
 
 	void trie_node_increment()
@@ -423,6 +433,235 @@ public:
 	}
 }; 
 
+
+template <typename Key, class Compare>
+struct trie_iterator <Key, void, void, void *, Compare>
+{
+	typedef std::bidirectional_iterator_tag iterator_category;
+	typedef Key key_type;
+	typedef void value_type;
+	typedef void reference;
+	typedef void* pointer;
+	typedef ptrdiff_t difference_type;
+	typedef trie_iterator<Key, value_type, reference, pointer, Compare> iterator;
+	typedef iterator iter_type;
+	typedef iter_type self;
+	typedef iterator const_iterator;
+	typedef trie_node<Key, value_type, Compare> trie_node_type;
+	typedef trie_node_type* trie_node_ptr;
+	typedef size_t size_type;
+
+	trie_node_ptr tnode;
+	size_type pos;
+
+public:
+	explicit trie_iterator() : tnode(0), pos(0)
+	{
+	}
+
+	trie_iterator(trie_node_ptr x) : tnode(x), pos(0)
+	{
+	}
+
+	explicit trie_iterator(trie_node_ptr t, size_type v) : tnode(t), pos(v)
+	{
+	}
+
+	trie_iterator(const iterator &it) : tnode(it.tnode), pos(it.pos)
+	{
+	}
+
+	/*
+	 *
+	 * a function returns the key on the path should be invented
+	 *
+	 */
+	std::vector<key_type> get_key()
+	{
+		std::vector<key_type> key_path;
+		trie_node_ptr cur = tnode;
+		while (cur->parent != NULL)
+		{
+			key_path.push_back(cur->key_elem());
+			cur = cur->parent;
+		}
+		return std::vector<key_type>(key_path.rbegin(), key_path.rend());
+	}
+
+	/*
+	 * should have a version that copy the path to a parameter
+	std::list<key_type> get_key()
+	{
+		std::list<key_type> key_path;
+		trie_node_ptr cur = tnode;
+		while (cur->parent != NULL)
+		{
+			key_path.push_front(cur->key_elem());
+			cur = cur->parent;
+		}
+		return key_path;
+	}
+	*/
+
+	/*
+	template<typename Container>
+	Container<key_type> get_key(Container<key_type>& container)
+	{
+		
+	}
+	*/
+
+private:
+	reference operator*() const 
+	{
+		return;
+	}
+
+	pointer operator->() const
+	{
+		return &(operator*()); 
+	}
+
+public:
+	bool operator==(const trie_iterator& other) const
+	{
+		return tnode == other.tnode;
+	}
+
+	bool operator!=(const trie_iterator& other) const
+	{
+		return tnode != other.tnode;
+	}
+
+	void trie_node_increment()
+	{
+		// at iterator end
+		if (tnode->parent == NULL)
+			return;
+		trie_node_ptr cur = tnode;
+		if (!cur->child.empty())
+		{ // go down to the first node with a value in it, and there always be at least one
+			do {
+				cur = cur->child.begin()->second;
+			} while (cur->no_value());
+			tnode = cur;
+		} else {
+			// go up till there is a sibling next to cur
+			// the algorithm here is not so efficient
+			while (cur->parent != NULL)
+			{
+				trie_node_ptr p = cur->parent;
+				typename trie_node_type::child_iter ci = cur->child_iter_of_parent;
+				++ci;
+				if (ci != p->child.end())
+				{
+					cur = ci->second;
+					//"change value to self_value_count
+					while (cur->no_value()) {
+						cur = cur->child.begin()->second;
+					}
+					break;
+				}
+				cur = p;
+			}
+			tnode = cur;
+		}
+	}
+
+	void trie_node_decrement()
+	{
+		trie_node_ptr cur = tnode;
+		// handle the decrement of end()
+		if (cur->parent == NULL)
+		{
+			while (!cur->child.empty())
+			{
+				cur = cur->child.rbegin()->second;
+			}
+			tnode = cur;
+			return;
+		}
+		trie_node_ptr p = cur->parent;
+		typename trie_node_type::child_iter ci = cur->child_iter_of_parent;
+		while (p != NULL && ci == p->child.begin() && p->no_value())
+		{
+			cur = p;
+			p = cur->parent;
+			ci = cur->child_iter_of_parent;
+		}
+		// p is root, that means the iterator is begin(), so do not change it
+		if (p == NULL)
+		{
+			//tnode = cur;
+			return;
+		}
+		// go down the trie
+		if (ci != p->child.begin())
+		{
+			--ci;
+			cur = ci->second;
+			while (!cur->child.empty())
+			{
+				cur = cur->child.rbegin()->second;
+			}
+			tnode = cur;
+			return;
+		}
+		// to parent which p->no_value == true
+		tnode = p;
+	}
+
+	void increment()
+	{
+		if (pos < tnode->self_value_count)
+		{
+			++pos;
+			return;
+		}
+		trie_node_increment();
+		pos = 0;
+	}
+
+	void decrement()
+	{
+		if (pos > 0)
+		{
+			--pos;
+			return;
+		}
+		trie_node_decrement();
+		pos = tnode->self_value_count;
+	}
+
+	self& operator++() 
+	{
+		increment();
+		// increment
+		return *this;
+	}
+	self operator++(int)
+	{
+		self tmp = *this;
+		increment();
+		// increment
+		return tmp;
+	}
+
+	self& operator--()
+	{
+		// decrement
+		decrement();
+		return *this;
+	}
+	self operator--(int)
+	{
+		self tmp = *this;
+		decrement();
+		return tmp;
+	}
+}; 
+
+
 template <typename TrieIterator>
 struct trie_reverse_iterator {
 	typedef TrieIterator iter_type;
@@ -515,181 +754,6 @@ public:
 };
 
 
-
-/*
-template <typename Key, typename Reference, typename Pointer, class Compare>
-struct trie_iterator<Key, void, Reference, Pointer, Compare> {
-	typedef std::bidirectional_iterator_tag iterator_category;
-	typedef Key key_type;
-	typedef void value_type;
-	typedef Reference ref;
-	typedef Pointer ptr;
-	//void does not allow const and reference
-	typedef trie_iterator<Key, value_type, value_type, value_type, Compare> iterator;
-	typedef trie_iterator<Key, value_type, value_type, value_type, Compare> iter_type;
-	typedef iterator self;
-	//void does not allow const and reference
-	typedef trie_iterator<Key, value_type, value_type, value_type, Compare> const_iterator;
-	typedef trie_node<Key, value_type, Compare> node_type;
-	typedef node_type* node_ptr;
-
-	node_ptr node;
-
-public:
-	explicit trie_iterator() : node(0)
-	{
-	}
-
-	trie_iterator(node_ptr x) : node(x) 
-	{
-	}
-
-	trie_iterator(const iterator &it) : node(it.node)
-	{
-	}
-
-	std::vector<key_type> get_key()
-	{
-		std::vector<key_type> key_path;
-		node_ptr cur = node;
-		while (cur->parent != NULL)
-		{
-			key_path.push_back(cur->key_elem());
-			cur = cur->parent;
-		}
-		return std::vector<key_type>(key_path.rbegin(), key_path.rend());
-	}
-
-
-private:
-	ref operator*() const 
-	{
-		return node->value;
-	}
-
-	ptr operator->() const
-	{
-		return &(operator*()); 
-	}
-
-public:
-	bool operator==(const trie_iterator& other) const
-	{
-		return node == other.node;
-	}
-
-	bool operator!=(const trie_iterator& other) const
-	{
-		return node != other.node;
-	}
-
-	void increment()
-	{
-		// at iterator end
-		if (node->parent == NULL)
-			return;
-		node_ptr cur = node;
-		if (!cur->child.empty())
-		{ // go down to the first node with a value in it, and there always be at least one
-			do {
-				cur = cur->child.begin()->second;
-			} while (cur->no_value());
-			node = cur;
-		} else {
-			// go up till there is a sibling next to cur
-			// the algorithm here is not so efficient
-			while (cur->parent != NULL)
-			{
-				node_ptr p = cur->parent;
-				typename node_type::child_iter ci = cur->child_iter_of_parent;
-				++ci;
-				if (ci != p->child.end())
-				{
-					cur = ci->second;
-					"change value to self_value_count
-					while (cur->no_value()) {
-						cur = cur->child.begin()->second;
-					}
-					break;
-				}
-				cur = p;
-			}
-			node = cur;
-		}
-	}
-
-	void decrement()
-	{
-		node_ptr cur = node;
-		// handle the decrement of end()
-		if (cur->parent == NULL)
-		{
-			while (!cur->child.empty())
-			{
-				cur = cur->child.rbegin()->second;
-			}
-			node = cur;
-			return;
-		}
-		node_ptr p = cur->parent;
-		typename node_type::child_iter ci = cur->child_iter_of_parent;
-		while (p != NULL && ci == p->child.begin() && p->no_value())
-		{
-			cur = p;
-			p = cur->parent;
-			ci = cur->child_iter_of_parent;
-		}
-		// root
-		if (p == NULL)
-		{
-			node = cur;
-			return;
-		}
-		// go down the trie
-		if (ci != p->child.begin())
-		{
-			--ci;
-			cur = ci->second;
-			while (!cur->child.empty())
-			{
-				cur = cur->child.rbegin()->second;
-			}
-			node = cur;
-			return;
-		}
-		// to parent which p->no_value == true
-		node = p;
-	}
-
-	self& operator++() 
-	{
-		increment();
-		// increment
-		return *this;
-	}
-	self operator++(int)
-	{
-		self tmp = *this;
-		increment();
-		// increment
-		return tmp;
-	}
-
-	self& operator--()
-	{
-		// decrement
-		decrement();
-		return *this;
-	}
-	self operator--(int)
-	{
-		self tmp = *this;
-		decrement();
-		return tmp;
-	}
-};
-*/
-
 } // namespace detail
 
 
@@ -760,17 +824,6 @@ private:
 		if (new_node != NULL)
 			++node_count; 
 		return new_node;
-	}
-
-	// that function seems bad, it is only for initializing root
-	node_ptr create_root() 
-	{
-		node_ptr tmp = get_trie_node();
-		if (tmp != NULL)
-		{
-			new(tmp) node_type();
-		}
-		return tmp;
 	}
 
 	node_ptr create_trie_node() 
@@ -950,11 +1003,11 @@ private:
 public:
 	// iterators still unavailable here
 
-	explicit trie() : trie_node_alloc(), value_alloc(), root(create_root()), node_count(0)/*, value_count(0) */
+	explicit trie() : trie_node_alloc(), value_alloc(), root(create_trie_node()), node_count(0)/*, value_count(0) */
 	{
 	}
 
-	explicit trie(const trie_type& t) : trie_node_alloc(), value_alloc(), root(create_root()), node_count(0)/* , value_count(0) */
+	explicit trie(const trie_type& t) : trie_node_alloc(), value_alloc(), root(create_trie_node()), node_count(0)/* , value_count(0) */
 	{
 		copy_tree(t.root);
 	}
