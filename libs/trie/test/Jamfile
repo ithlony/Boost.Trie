@@ -18,6 +18,7 @@ project
 	  <library>$(boost_root)stage/lib/libboost_unit_test_framework.a
 	;
 
+run test_set.cpp ;
 run test_map.cpp ;
 run test_multiset.cpp ;
 run test_multimap.cpp ;

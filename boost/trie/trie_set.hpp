@@ -6,6 +6,7 @@
 #endif
 
 #include <boost/trie/trie.hpp>
+#include <boost/blank.hpp>
 
 namespace boost { namespace tries {
 
@@ -14,14 +15,15 @@ class trie_set
 {
 public:
 	typedef Key key_type;
-	typedef bool value_type;
+	typedef boost::blank value_type;
 	typedef trie<key_type, value_type, Compare> trie_type;
 	typedef trie_set<Key, Compare> trie_set_type;
 	typedef typename trie_type::const_iterator iterator;
 	typedef typename trie_type::const_iterator const_iterator;
 	typedef typename trie_type::const_reverse_iterator reverse_iterator;
 	typedef typename trie_type::const_reverse_iterator const_reverse_iterator;
-	typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
+	//typedef typename trie_type::pair_iterator_bool pair_iterator_bool;
+	//the iterator type is different, so the above code does not compile correctly
 	typedef typename trie_type::iterator_range iterator_range;
 	typedef size_t size_type;
 
@@ -105,13 +107,13 @@ public:
 
 	// modifying functions
 	template<typename Iter>
-	pair_iterator_bool insert(Iter first, Iter last)
+	std::pair<iterator, bool> insert(Iter first, Iter last)
 	{
 		return t.insert_unique(first, last, value_type());
 	}
 
 	template<typename Container>
-	pair_iterator_bool insert(const Container& container)
+	std::pair<iterator, bool> insert(const Container& container)
 	{
 		return t.insert_unique(container, value_type());
 	}
@@ -255,7 +257,7 @@ public:
 		return t.empty();
 	}
 
-	void swap(const trie_map_type& other)
+	void swap(const trie_set_type& other)
 	{
 		t.swap(other.t);
 	}

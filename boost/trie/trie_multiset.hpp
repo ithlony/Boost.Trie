@@ -6,6 +6,7 @@
 #endif
 
 #include <boost/trie/trie.hpp>
+#include <boost/blank.hpp>
 
 namespace boost { namespace tries {
 
@@ -14,7 +15,7 @@ class trie_multiset
 {
 public:
 	typedef Key key_type;
-	typedef bool value_type;
+	typedef boost::blank value_type;
 	typedef trie<key_type, value_type, Compare> trie_type;
 	typedef trie_multiset<Key, Compare> trie_multiset_type;
 	typedef typename trie_type::const_iterator iterator;

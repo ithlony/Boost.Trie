@@ -1128,8 +1128,7 @@ public:
 		}
 
 	template<typename Iter>
-		pair_iterator_bool insert_unique(Iter first, Iter last,
-				const value_type& value)
+		pair_iterator_bool insert_unique(Iter first, Iter last, const value_type& value)
 		{
 			node_ptr cur = root;
 			for (; first != last; ++first)
