@@ -22,13 +22,13 @@ makefile
 *.txt
 
 # Build artifacts are put here by bjam
-/bin.v2/
-/bin/
-/libs/trie/test/bin.v2/
-/libs/trie/test/bin/
-/libs/trie/time_perform/bin/
-/libs/trie/time_perform/bin.v2/
-/**/bin/*
-/**/bin.v2/*
+bin.v2/
+bin/
+#/libs/trie/test/bin.v2/
+#/libs/trie/test/bin/
+#/libs/trie/time_perform/bin/
+#/libs/trie/time_perform/bin.v2/
+#/**/bin/**/
+#/**/bin.v2/**/
 
 
