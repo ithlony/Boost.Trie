@@ -1,0 +1,22 @@
+import testing ;
+import modules ;
+
+using gcc 
+;
+
+local boost_root = [ modules.peek : BOOST_ROOT ] ;
+local lib_root = $(boost_root)/stage/lib ;
+
+project :
+	requirements
+		<include>$(boost_root)
+		<include>/home/god/develop/Boost.Trie/
+		<library>$(lib_root)/libboost_timer.a
+		<library>$(lib_root)/libboost_chrono.a
+		<library>$(lib_root)/libboost_system.a
+		#<testing.launcher>valgrind #this makes program more than 10 times slower
+		<cxxflags>-std=gnu++0x
+;
+
+#run measure_trie_map.cpp ;
+run comp_rand_string.cpp ;

@@ -7,7 +7,7 @@
 import testing ;
 import modules ;
 
-using gcc ;
+#using gcc ;
 #using clang ;
 
 local boost_root = [ modules.peek : BOOST_ROOT ] ;
@@ -16,6 +16,7 @@ project
 	  <include>$(boost_root)
 	  <include>../../../
 	  <library>$(boost_root)stage/lib/libboost_unit_test_framework.a
+	  <testing.launcher>valgrind
 	;
 
 run test_set.cpp ;

@@ -26,5 +26,9 @@ makefile
 /bin/
 /libs/trie/test/bin.v2/
 /libs/trie/test/bin/
+/libs/trie/time_perform/bin/
+/libs/trie/time_perform/bin.v2/
+/**/bin/*
+/**/bin.v2/*
 
 

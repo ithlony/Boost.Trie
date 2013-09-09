@@ -1114,7 +1114,6 @@ public:
 			value_node_ptr vn = new_value_node(value);
 			value_list_push(cur, vn);
 
-			std::cout << cur << std::endl;
 			// update value_count on the path
 			node_ptr tmp = cur;
 			while (tmp != NULL) // until root
