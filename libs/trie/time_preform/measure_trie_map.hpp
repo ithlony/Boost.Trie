@@ -66,8 +66,10 @@ class count_prefix_from_tmap{
 			void operator()(const KeyContainer& prefix, boost::tries::trie_map<KeyElement, int>& t)
 			{
 				int cnt = t.count_prefix(prefix);
+#ifdef DEBUG
 				if (cnt > 1)
 					std::cout << cnt << std::endl;
+#endif
 			}
 };
 

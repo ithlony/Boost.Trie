@@ -97,8 +97,10 @@ class count_prefix_from_map
 					++i;
 					++cnt;
 				}
+#ifdef DEBUG
 				if (cnt > 1)
 					std::cout << cnt << std::endl;
+#endif
 			}
 };
 
