@@ -34,7 +34,7 @@ void read_data()
 template<class Functor, class Param1, class Param2>
 void infos(int rep_time, Functor func, Param1& vs, Param2& m)
 {
-	std::cout << typeid(func).name() << std::endl;
+	std::cout << typeid(func).name() << " " << typeid(m).name() << std::endl;
 	std::cout << "repeat time: " << rep_time << std::endl;
 	std::cout << "data size: " << vs.size() << std::endl;
 }
@@ -57,6 +57,26 @@ void performance_profile(int rep_time, PFunctor pfunc, Functor func, Param1& vs,
 		pfunc(func, vs, m);
 }
 
+class iteration {
+	public:
+		template <class Iter>
+			void operator() (Iter first, Iter last)
+			{
+				for (Iter i = first; i != last; ++i)
+					*i;
+			}
+};
+
+template<class Functor, class Param>
+void performance_profile(int rep_time, Functor func, Param& m)
+{
+	infos(rep_time, func, vs, m);
+	boost::timer::auto_cpu_timer t(5, " %t sec CPU, %w sec real\n\n");
+	for (int i = 0; i < rep_time; ++i)
+		func(m.begin(), m.end());
+}
+
+
 int main()
 {
 	read_data();
@@ -73,6 +93,8 @@ int main()
 	performance_profile(100, count_prefix_from_tmap(), vs[0], tm);
 	performance_profile(1, handle_prefixes(), count_prefix_from_map(), vs, m);
 	performance_profile(1, handle_prefixes(), count_prefix_from_tmap(), vs, tm);
+	performance_profile(100, iteration(), m);
+	performance_profile(100, iteration(), tm);
 
 	return 0;
 }
